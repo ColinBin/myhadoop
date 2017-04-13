@@ -1,7 +1,7 @@
 # general config
 general_config = {
     "mode": "local",
-    "datanode_number": 4,
+    "datanode_number": 2,
     "app_name": "wordcount",
 }
 

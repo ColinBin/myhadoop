@@ -6,16 +6,14 @@ from tools import *
 import queue
 import json
 
-scheduler_start_lock = threading.Lock()
+datanode_number = general_config['datanode_number']
+
 input_file_generator_lock = threading.Lock()
 datanode_keeper_lock = threading.Lock()
-job_queue_lock = threading.Lock()
 
-job_queue = queue.Queue(maxsize=0)     # task queue
-
-input_file_generator = None             # iterator for input files
-
-input_dir = None                        # input dir
+job_queue = queue.Queue(maxsize=0)      # job queue
+task_queues = None                      # queues of map or reduce tasks for datanodes
+feedback_queue = queue.Queue(maxsize=0) # feedback queue for clients
 
 datanode_address_keeper = dict()        # relate datanode id with ip and port
 
@@ -26,14 +24,12 @@ def namenode_start():
     :return: 
     
     """
-    # check dirs and get input file list
-    global input_file_generator, input_dir, datanode_address_keeper
-    input_dir, input_file_list = check_dir()
-    input_file_generator = (file for file in input_file_list)
+    global task_queues, datanode_number
+    # start job tracker thread
+    threading.Thread(target=thread_jobtracker).start()
 
-    # start scheduler thread
-    scheduler_start_lock.acquire()
-    threading.Thread(target=thread_scheduler).start()
+    # create task queues
+    task_queues = [queue.Queue(maxsize=0) for number in list(range(datanode_number))]
 
     # bind and listen inside port
     namenode_port_in = net_config['namenode_port_in']
@@ -41,20 +37,18 @@ def namenode_start():
     server_sock_in.bind(('localhost', namenode_port_in))
     server_sock_in.listen()
 
-    # connect with datanodes
-    datanode_threads = []
-    datanode_number = general_config['datanode_number']
-    for number in list(range(1, datanode_number + 1)):
+    # connect with datanodes, start datanode tracker threads
+    datanode_tracker_threads = []
+    for number in list(range(datanode_number)):
         sock, addr = server_sock_in.accept()
         datanode_address_keeper[number] = addr
-        datanode_thread = threading.Thread(target=thread_datanode, args=(sock, addr))
-        datanode_threads.append(datanode_thread)
+        datanode_tracker_thread = threading.Thread(target=thread_datanode_tracker, args=(sock, addr, number))
+        datanode_tracker_threads.append(datanode_tracker_thread)
     server_sock_in.close()
-
-    for datanode_thread in datanode_threads:
+    for datanode_thread in datanode_tracker_threads:
         datanode_thread.start()
-    for datanode_thread in datanode_threads:
-        datanode_thread.join()
+    # for datanode_thread in datanode_tracker_threads:
+    #     datanode_thread.join()
 
     # bind and listen outside port, waiting for submitted jobs
     namenode_port_out = net_config['namenode_port_out']
@@ -69,27 +63,60 @@ def namenode_start():
         client_thread.start()
 
 
-def thread_scheduler():
-    """Scheduler Thread for scheduling reduce tasks and shuffling
+def thread_jobtracker():
+    """Fetch jobs and track the progress
     
     :return:
      
     """
-    scheduler_start_lock.acquire()
-    print("Hello")
+    log("JOBTRACKER", "jobtracker started")
+
+    global job_queue, task_queues
+
+    while True:
+        # get a new job
+        job_info_json = job_queue.get()
+        job_name = job_info_json['job_name']
+        input_dir = job_info_json['input_dir']
+        output_dir = job_info_json['output_dir']
+        input_file_list = job_info_json['input_file_list']
+        log("JOBTRACKER", "new job started --> " + job_name)
+
+        # notifying datanodes about new job
+        for datanode_id in list(range(datanode_number)):
+            job_info = {"type": "NEW_JOB", "job_name": job_name, "input_dir": input_dir, "output_dir": output_dir}
+            task_queues[datanode_id].put(job_info)
+        # for file in input_file_list:
+        #     for datanode_id in list(range(datanode_number)):
+        #         task_queues[datanode_id].put({})
 
 
-def thread_datanode(sock, addr):
-    received_message = sock.recv(1024)
-    response = received_message.decode('utf-8') + "Colin"
-    response = response.encode()
-    sock.send(response)
-    sock.close()
-    pass
+def thread_datanode_tracker(sock, addr, id):
+    """Assign tasks, exchange information with datanodes via socket
+    
+    :param sock: 
+    :param addr: 
+    :return:
+     
+    """
+    global task_queues, feedback_queue
+    while True:
+        task_info = task_queues[id].get()
+        if task_info['type'] == "NEW_JOB":
+            job_name = task_info['job_name']
+            input_dir = task_info['input_dir']
+            output_dir = task_info['output_dir']
+
+            message = sock.recv(1024).decode('utf-8')
+            response = message + job_name
+            sock.send(response.encode())
+
+            feedback_info = {"status": "SUCCESS", "message": "job done"}
+            feedback_queue.put(feedback_info)
 
 
 def thread_client(sock, addr):
-    """Received jobs to run
+    """Obtain jobs to run
     
     :param sock: 
     :param addr: 
@@ -101,9 +128,21 @@ def thread_client(sock, addr):
     if job_info['request_type'] == "NEW_JOB":
         job_name = job_info['job_name']
         job_fs_path = job_info['job_fs_path']
-        job_queue_lock.acquire()
-        job_queue.put((job_name, job_fs_path))
-        job_queue_lock.release()
+        input_dir, output_dir, input_file_list = check_dir(job_fs_path)            # check dir for the job
+        if len(input_file_list) <= 0:
+            feedback_info = {"status": "ERROR", "message": "checking directories failed"}
+            send_json(sock, feedback_info)
+            return
+        feedback_info = {"status": "INFO", "message": "checking directories succeeded"}
+        send_json(sock, feedback_info)
+        job_queue.put({"job_name": job_name, "input_dir": input_dir,"output_dir": output_dir, "input_file_list": input_file_list})
+
+        # keep sending feedback until SUCCESS
+        while True:
+            feedback_info = feedback_queue.get()
+            send_json(sock, feedback_info)
+            if feedback_info['status'] == "SUCCESS":
+                break
 
 if __name__ == "__main__":
     namenode_start()

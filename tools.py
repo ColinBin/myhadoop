@@ -34,3 +34,15 @@ def get_json(sock, max_length=1024):
     data_bytes = sock.recv(max_length)
     data_json = json.loads(data_bytes)
     return data_json
+
+
+def send_json(sock, data_json):
+    """Send json data after converting to bytes
+    
+    :param sock:
+    :param data_json: 
+    :return: 
+    
+    """
+    data_bytes = json.dumps(data_json).encode()
+    sock.send(data_bytes)
