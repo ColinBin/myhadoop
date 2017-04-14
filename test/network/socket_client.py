@@ -7,6 +7,7 @@ s.connect(('localhost', 8888))
 to_send = b"Hello World"
 
 s.send(to_send)
+s.sendall()
 
 response = s.recv(1024)
 

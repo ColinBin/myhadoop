@@ -14,7 +14,7 @@ def get_key(y):
     return y[0]
 
 
-list_str = ["hello", 'World', 'Colin', "World", 'Colin']
+list_str = ["hello", 'Worldx', 'Colin', "World", 'Colin']
 
 map_result = map(wordcount_map, list_str)
 sorted_result = sorted(map_result, key=get_key)

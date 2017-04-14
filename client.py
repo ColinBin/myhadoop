@@ -17,7 +17,7 @@ def client_start():
     sock.connect((namenode_ip, namenode_port_out))
 
     # send job information
-    job_information = {"request_type": "NEW_JOB", "job_name": "WordCount", "job_fs_path": "wordcount"}
+    job_information = {"type": "NEW_JOB", "job_name": "WordCount", "job_fs_path": "wordcount"}
     send_json(sock, job_information)
 
     # receive job feedback

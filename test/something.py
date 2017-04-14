@@ -1,18 +1,20 @@
 import json
-
-d = dict()
-d[1] = 1
-print(d[1])
-
-data_json = {"name": "Colin", "age": 18}
-data_bytes = json.dumps(data_json).encode()
-data_json = json.loads(data_bytes)
-print(data_json["name"])
-
-print(["Hello" for i in list(range(1, 6))])
-
-s = [1, 2, 3]
-print(s[1])
+import queue
 
 
-print(list(range(5)))
+class App(object):
+
+    def map(self):
+        print("Calling map function")
+
+    def reduce(self, name):
+        print(name + "Calling reduce function")
+
+
+def hello(name):
+    print("Hello " + name)
+
+f = dict()
+f['first'] = App
+
+f['first']().reduce("Colin")
