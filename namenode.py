@@ -13,7 +13,7 @@ datanode_keeper_lock = threading.Lock()
 
 job_queue = queue.Queue(maxsize=0)      # job queue
 task_queues = None                      # queues of map or reduce tasks for datanodes
-feedback_queue = queue.Queue(maxsize=0) # feedback queue for clients
+client_feedback_queue = queue.Queue(maxsize=0) # feedback queue for clients
 
 datanode_address_keeper = dict()        # relate datanode id with ip and port
 
@@ -109,7 +109,7 @@ def thread_datanode_tracker(sock, addr, id):
     :return:
      
     """
-    global task_queues, feedback_queue, datanode_address_keeper
+    global task_queues, client_feedback_queue, datanode_address_keeper
 
     # send datanode address information
     datanode_ad_info = {"type": "DATANODES_AD", "content": datanode_address_keeper, "id_self": id}
@@ -144,7 +144,7 @@ def thread_datanode_tracker(sock, addr, id):
             # waiting for map tasks feedback
 
         # feedback_info = {"status": "SUCCESS", "message": "job done"}
-        # feedback_queue.put(feedback_info)
+        # client_feedback_queue.put(feedback_info)
 
 
 def thread_client(sock, addr):
@@ -171,7 +171,7 @@ def thread_client(sock, addr):
 
         # keep sending feedback until SUCCESS
         while True:
-            feedback_info = feedback_queue.get()
+            feedback_info = client_feedback_queue.get()
             send_json(sock, feedback_info)
             if feedback_info['status'] == "SUCCESS":
                 break

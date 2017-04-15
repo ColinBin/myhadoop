@@ -22,8 +22,6 @@ def check_dir(job_fs_path):
     app_input_dir = fs_config['input_dir'] + "/" + job_fs_path
     app_output_dir = fs_config['output_dir'] + "/" + job_fs_path
 
-    app_input_list = []
-
     if not os.path.exists(app_input_dir):
         err_log("FS", "app input directory not ready")
     else:

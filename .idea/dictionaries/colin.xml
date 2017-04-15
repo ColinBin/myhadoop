@@ -2,7 +2,9 @@
   <dictionary name="colin">
     <words>
       <w>addr</w>
+      <w>groupby</w>
       <w>jobtracker</w>
+      <w>mkdir</w>
       <w>tasktracker</w>
     </words>
   </dictionary>

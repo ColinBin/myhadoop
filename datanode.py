@@ -6,7 +6,8 @@ import shutil
 import queue
 import threading
 import json
-from app_route import app_route_info
+from app_route import *
+from utilities import *
 from functools import reduce
 
 datanode_id_self = None
@@ -57,14 +58,10 @@ def datanode_start():
             # if directories exist, remove and make
             datanode_dir = fs_config['datanode_dir']
             local_dir = os.path.join(datanode_dir, str(datanode_id_self))
-            if os.path.exists(local_dir):
-                shutil.rmtree(local_dir)
-            os.mkdir(local_dir)
+            check_and_make_directory(local_dir)
             log("FS", "temporary directory ready for " + job_name)
             reduce_output_dir = os.path.join(output_dir, str(datanode_id_self))
-            if os.path.exists(reduce_output_dir):
-                shutil.rmtree(reduce_output_dir)
-            os.mkdir(reduce_output_dir)
+            check_and_make_directory(reduce_output_dir)
             log("FS", "output directory ready for " + job_name)
 
             # call do_the_job
@@ -108,7 +105,7 @@ def thread_map_task():
     :return: 
     
     """
-    global map_task_queue, map_feedback_queue, datanode_id_self
+    global map_task_queue, map_feedback_queue, datanode_id_self, local_dir
 
     while True:
         map_task = map_task_queue.get()
@@ -117,19 +114,26 @@ def thread_map_task():
         map_task_file = map_task['map_task_file']
         map_task_id = map_task['map_task_id']
 
-        # find app map and reduce functions
+        # find app map function
         app = app_route_info[job_name]()
         map_fun = app.map
-        reduce_fun = app.reduce
 
+        # make directory for current map task
+        map_task_dir = os.path.join(local_dir, map_task_id)
+        check_and_make_directory(map_task_dir)
+
+        # read file and apply map function
         with open(os.path.join(input_dir, map_task_file), 'r', encoding='utf-8') as f:
             content = []
             for line in f:
                 for word in line.split():
                     content.append(word)
-            map_result = map(map_fun, content)
+            raw_map_result = map(map_fun, content)
+            sorted_map_result = sorted(raw_map_result, key=get_key_for_sort_partition)
 
-            print(map_task_id + str(list(map_result)))
+        # write partitions locally and get partition information
+        partition_info = partition_sorted(sorted_map_result, map_task_dir)
+        print(partition_info)
 
 
 def shuffle():

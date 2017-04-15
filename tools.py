@@ -1,5 +1,8 @@
 import sys
 import json
+import os
+import shutil
+
 
 def err_log(err_type, err_message):
     """Print err information to stderr
@@ -93,3 +96,14 @@ def send_json_check_echo(sock, json_data):
     """
     send_json(sock, json_data)
     check_echo_success(sock)
+
+
+def check_and_make_directory(dir_path):
+    """Check whether dir_path exists, if exists, remove and remake 
+    
+    :param dir_path: 
+    :return: 
+    """
+    if os.path.exists(dir_path):
+        shutil.rmtree(dir_path)
+    os.mkdir(dir_path, 0o755)
