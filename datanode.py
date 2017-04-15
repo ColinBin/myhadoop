@@ -80,6 +80,9 @@ def do_the_job(sock, job_name, input_dir, output_dir):
     """
     global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue
 
+    # keep track of map tasks locally
+    map_task_local_tracker = dict()
+
     # receive map tasks
     while True:
         # get task info and send echo
@@ -87,16 +90,45 @@ def do_the_job(sock, job_name, input_dir, output_dir):
 
         # if new task, add to the queue
         task_type = task_info['type']
+
         if task_type == "MAP_TASK":
             map_task_id = task_info['map_task_id']
             map_task_file = task_info['map_task_file']
             map_task = {"job_name": job_name, "input_dir": input_dir, "map_task_id": map_task_id, "map_task_file": map_task_file}
             map_task_queue.put(map_task)
+            map_task_local_tracker[map_task_id] = "START"
 
-        elif task_type == "MAP_TASK_END":
+        elif task_type == "MAP_TASK_ASSIGNMENT_END":
             break
 
     # send back map task feedback
+    while True:
+
+        map_feedback_info = map_feedback_queue.get()
+        map_task_id = map_feedback_info['map_task_id']
+
+        if map_feedback_info['type'] == "MAP_TASK_DONE":
+            # send feedback and update map task progress
+            send_json_check_echo(sock, map_feedback_info)
+            map_task_local_tracker[map_task_id] = "FINISH"
+        elif map_feedback_info['type'] == 'MAP_PARTITION_INFO':
+            # send partition info
+            send_json_check_echo(sock, map_feedback_info)
+
+        # TODO may send feedback information (partial information) before the task is done
+
+        # check if all map tasks have been done
+        # TODO use counters to improve performance
+        for status in map_task_local_tracker.values():
+            if status != "FINISH":
+                # get next feedback
+                break
+        else:
+            # send all-done info and break while loop
+            log("JOB", "map tasks done")
+            map_datanode_done_info = {'type': "MAP_DATANODE_DONE", "datanode_id": datanode_id_self}
+            send_json_check_echo(sock, map_datanode_done_info)
+            break
 
 
 def thread_map_task():
@@ -133,7 +165,14 @@ def thread_map_task():
 
         # write partitions locally and get partition information
         partition_info = partition_sorted(sorted_map_result, map_task_dir)
-        print(partition_info)
+
+        # send partition info for scheduling
+        map_partition_info = {'type': "MAP_PARTITION_INFO", "map_task_id": map_task_id, "datanode_id": datanode_id_self, 'partition_info': partition_info}
+        map_feedback_queue.put(map_partition_info)
+
+        # send task done info
+        map_task_done_info = {"type": "MAP_TASK_DONE", "job_name": job_name, "map_task_id": map_task_id, "status": "FINISH", "datanode_id": datanode_id_self}
+        map_feedback_queue.put(map_task_done_info)
 
 
 def shuffle():

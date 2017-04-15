@@ -35,3 +35,14 @@ print(sum(bytearray(b"A")))
 l = list("[1, 2, 3, 4]")
 print(h)
 
+n = dict()
+n['name'] = "Colin"
+n[2] = "Colin"
+while True:
+    print("Here")
+    for v in n.values():
+        if v != "Colin":
+            break
+    else:
+        break
+

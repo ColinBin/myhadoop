@@ -8,13 +8,13 @@ import json
 
 datanode_number = general_config['datanode_number']
 
-input_file_generator_lock = threading.Lock()
-datanode_keeper_lock = threading.Lock()
+job_queue_tracker = queue.Queue(maxsize=0)      # job queue for job tracker
+job_queue_scheduler = queue.Queue(maxsize=0)    # job queue for scheduler
 
-job_queue = queue.Queue(maxsize=0)      # job queue
 task_queues = None                      # queues of map or reduce tasks for datanodes
-client_feedback_queue = queue.Queue(maxsize=0) # feedback queue for clients
-
+datanodes_feedback_queue = queue.Queue(maxsize=0)   # queue for receiving feedback from datanodes
+client_feedback_queue = queue.Queue(maxsize=0)      # feedback queue for clients
+partition_info_queue = queue.Queue(maxsize=0)       # partition info queue
 datanode_address_keeper = dict()        # relate datanode id with ip and port
 
 
@@ -27,6 +27,9 @@ def namenode_start():
     global task_queues, datanode_number
     # start job tracker thread
     threading.Thread(target=thread_jobtracker).start()
+
+    # start scheduler thread
+    threading.Thread(target=thread_scheduler).start()
 
     # create task queues
     task_queues = [queue.Queue(maxsize=0) for number in list(range(datanode_number))]
@@ -64,6 +67,35 @@ def namenode_start():
         client_thread.start()
 
 
+def thread_scheduler():
+    """receive partition info and schedule shuffle and reduce 
+    
+    :return: 
+    
+    """
+    global datanode_number, partition_info_queue, job_queue_scheduler
+    log("SCHEDULER", "scheduler stared")
+    # wait for new job
+    while True:
+        job_info = job_queue_scheduler.get()
+        job_name = job_info['job_name']
+
+        # get partition info from datanodes
+        while True:
+            partition_info = partition_info_queue.get()
+            type = partition_info['type']
+
+            # if partition info
+            if type == "MAP_PARTITION_INFO":
+                map_task_id = partition_info['map_task_id']
+                datanode_id = partition_info['datanode_id']
+                partition_info = partition_info['partition_info']
+            elif type == 'MAP_ALL_DONE':
+                # if map all done, break
+                log("SCHEDULER", "finish gathering partition info for job " + job_name)
+                break
+
+
 def thread_jobtracker():
     """Fetch jobs and track the progress
     
@@ -72,21 +104,30 @@ def thread_jobtracker():
     """
     log("JOBTRACKER", "jobtracker started")
 
-    global job_queue, task_queues
+    global job_queue_tracker, task_queues, datanodes_feedback_queue, partition_info_queue
 
     while True:
         # get a new job
-        job_info_json = job_queue.get()
+        job_info_json = job_queue_tracker.get()
+
+        # notify scheduler
+        job_queue_scheduler.put(job_info_json)
+
+        # get specific information
         job_name = job_info_json['job_name']
         input_dir = job_info_json['input_dir']
         output_dir = job_info_json['output_dir']
         input_file_list = job_info_json['input_file_list']
         log("JOBTRACKER", "new job started --> " + job_name)
 
+        # keep track of datanode progress locally
+        datanode_progress_info = dict()
+
         # notifying datanodes about new job
         for datanode_id in list(range(datanode_number)):
             job_info = {"type": "NEW_JOB", "job_name": job_name, "input_dir": input_dir, "output_dir": output_dir}
             task_queues[datanode_id].put(job_info)
+            datanode_progress_info[datanode_id] = "START"
 
         # assign map tasks to datanodes with file information
         current_datanode_id = 0
@@ -97,8 +138,30 @@ def thread_jobtracker():
 
         # notify ending of map tasks assignment
         for datanode_id in list(range(datanode_number)):
-            map_task_end_info = {"type": "MAP_TASK_END"}
-            task_queues[datanode_id].put(map_task_end_info)
+            map_task_assignment_end_info = {"type": "MAP_TASK_ASSIGNMENT_END"}
+            task_queues[datanode_id].put(map_task_assignment_end_info)
+            datanode_progress_info[datanode_id] = "MAP_TASK_ASSIGNMENT_END"
+
+        # receive map task feedback information
+        while True:
+            map_feedback_info = datanodes_feedback_queue.get()
+            if map_feedback_info['type'] == 'MAP_TASK_DONE':
+                task_status = map_feedback_info['status']
+                map_task_id = map_feedback_info['map_task_id']
+                if task_status == "FINISH":
+                    print("map finished " + map_task_id)
+            elif map_feedback_info['type'] == 'MAP_DATANODE_DONE':
+                datanode_id = map_feedback_info['datanode_id']
+                datanode_progress_info[datanode_id] = "MAP_DATANODE_DONE"
+                for status in datanode_progress_info.values():
+                    if status != "MAP_DATANODE_DONE":
+                        # some datanode has not finished map tasks
+                        break
+                else:
+                    # all map tasks are done, notify scheduler and break
+                    map_all_done_scheduler_info = {'type': "MAP_ALL_DONE"}
+                    partition_info_queue.put(map_all_done_scheduler_info)
+                    break
 
 
 def thread_datanode_tracker(sock, addr, id):
@@ -109,7 +172,7 @@ def thread_datanode_tracker(sock, addr, id):
     :return:
      
     """
-    global task_queues, client_feedback_queue, datanode_address_keeper
+    global task_queues, client_feedback_queue, datanode_address_keeper, datanodes_feedback_queue
 
     # send datanode address information
     datanode_ad_info = {"type": "DATANODES_AD", "content": datanode_address_keeper, "id_self": id}
@@ -138,10 +201,23 @@ def thread_datanode_tracker(sock, addr, id):
                 send_json_check_echo(sock, task_info)
 
                 # if no more map tasks, break
-                if task_type == "MAP_TASK_END":
+                if task_type == "MAP_TASK_ASSIGNMENT_END":
                     break
 
             # waiting for map tasks feedback
+            while True:
+                map_feedback_info = get_json_echo(sock)
+                type = map_feedback_info['type']
+                if type == "MAP_TASK_DONE":
+                    datanodes_feedback_queue.put(map_feedback_info)
+                elif type == "MAP_PARTITION_INFO":
+                    # for map partition info, add to partition info queue
+                    partition_info_queue.put(map_feedback_info)
+                elif type == "MAP_DATANODE_DONE":
+                    # if assigned map tasks all done, break
+                    datanodes_feedback_queue.put(map_feedback_info)
+                    break
+
 
         # feedback_info = {"status": "SUCCESS", "message": "job done"}
         # client_feedback_queue.put(feedback_info)
@@ -167,7 +243,7 @@ def thread_client(sock, addr):
             return
         feedback_info = {"type": "FEEDBACK", "status": "INFO", "message": "checking directories succeeded"}
         send_json(sock, feedback_info)
-        job_queue.put({"job_name": job_name, "input_dir": input_dir,"output_dir": output_dir, "input_file_list": input_file_list})
+        job_queue_tracker.put({"job_name": job_name, "input_dir": input_dir,"output_dir": output_dir, "input_file_list": input_file_list})
 
         # keep sending feedback until SUCCESS
         while True:
