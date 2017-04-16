@@ -4,7 +4,7 @@ from config import *
 import threading
 from tools import *
 import queue
-import json
+from utilities import *
 
 datanode_number = general_config['datanode_number']
 
@@ -39,6 +39,10 @@ def namenode_start():
     server_sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock_in.bind(('localhost', namenode_port_in))
     server_sock_in.listen()
+
+    # clear datanode dir
+    datanode_dir = fs_config['datanode_dir']
+    check_and_make_directory(datanode_dir)
 
     # connect with datanodes, start datanode tracker threads
     datanode_tracker_threads = []
@@ -80,20 +84,106 @@ def thread_scheduler():
         job_info = job_queue_scheduler.get()
         job_name = job_info['job_name']
 
+        # keep track of partition info
+        partition_info_tracker = dict()
+        for datanode_id in list(range(datanode_number)):
+            partition_info_tracker[datanode_id] = dict()
+
         # get partition info from datanodes
         while True:
             partition_info = partition_info_queue.get()
-            type = partition_info['type']
+            info_type = partition_info['type']
 
             # if partition info
-            if type == "MAP_PARTITION_INFO":
+            if info_type == "MAP_PARTITION_INFO":
+                # merge partition info
                 map_task_id = partition_info['map_task_id']
                 datanode_id = partition_info['datanode_id']
                 partition_info = partition_info['partition_info']
-            elif type == 'MAP_ALL_DONE':
+                merge_partition_info(partition_info_tracker[datanode_id], partition_info)
+            elif info_type == 'MAP_ALL_DONE':
                 # if map all done, break
                 log("SCHEDULER", "finish gathering partition info for job " + job_name)
                 break
+        # print(partition_info_tracker)
+        # schedule based on partition info
+        schedule(partition_info_tracker)
+
+
+def schedule(partition_info_tracker):
+    """Based on partition info, generate reduce queue and shuffle queue for each datanode
+    
+    :param partition_info_tracker: 
+    :return: 
+    
+    """
+    global datanode_number
+
+    # schedule plan to return
+    shuffle_queues = dict()
+    reduce_queues = dict()
+
+    # locality matrices of size datanode_number * partition_number
+    internal_locality = [[0 for partition_id in list(range(partition_number))] for datanode_id in list(range(datanode_number))]
+    node_locality = [[0 for partition_id in list(range(partition_number))] for datanode_id in list(range(datanode_number))]
+    combined_locality = [[0 for partition_id in list(range(partition_number))] for datanode_id in list(range(datanode_number))]
+
+    # calculate internal locality
+    for datanode_id in list(range(datanode_number)):
+        partition_info = partition_info_tracker[datanode_id]
+        total_workload_datanode = sum(partition_info.values())
+        for partition_id in list(range(partition_number)):
+            internal_locality[datanode_id][partition_id] = partition_info[partition_id] / total_workload_datanode
+
+    # calculate node locality
+    for partition_id in list(range(partition_number)):
+        total_workload_partition = sum(partition_info_tracker[datanode_id][partition_id] for datanode_id in list(range(datanode_number)))
+        for datanode_id in list(range(datanode_number)):
+            node_locality[datanode_id][partition_id] = partition_info_tracker[datanode_id][partition_id] / total_workload_partition
+
+    # calculate combined locality
+    for datanode_id in list(range(datanode_number)):
+        for partition_id in list(range(partition_number)):
+            combined_locality[datanode_id][partition_id] = internal_locality[datanode_id][partition_id] * node_locality[datanode_id][partition_id]
+
+    # calculate average load
+    total_workload = sum(sum(partition_info_tracker[datanode_id].values()) for datanode_id in list(range(datanode_number)))
+    average_workload = total_workload / datanode_number
+
+    # TODO use heap to manage
+    # previous solution
+    reduce_decisions = dict()       # partition_id : namenode_id
+    datanode_load = dict()          # datanode_id : workload
+
+    # initialize
+    for datanode_id in list(range(datanode_number)):
+        datanode_load[datanode_id] = 0
+
+    while True:
+        # get datanode with minimum workload
+        current_datanode_id = 0
+        for datanode_id in list(range(datanode_number)):
+            if datanode_load[datanode_id] < datanode_load[current_datanode_id]:
+                current_datanode_id = datanode_id
+
+        # get maximum locality on current datanode
+        datanode_locality_info = combined_locality[current_datanode_id]
+        # find first partition not assigned
+        current_partition_id = -1
+        for partition_id in list(range(partition_number)):
+            if partition_id not in reduce_decisions.keys():
+                current_partition_id = partition_id
+        # all partition assigned
+        if current_partition_id == -1:
+            break
+        for partition_id in list(range(partition_number)):
+            if datanode_locality_info[partition_id] > datanode_locality_info[current_partition_id]:
+                if partition_id not in reduce_decisions.keys():
+                    current_partition_id = partition_id
+        reduce_decisions[current_partition_id] = current_datanode_id
+        datanode_load[current_datanode_id] = datanode_load[current_datanode_id] + sum(partition_info_tracker[datanode_id][current_partition_id] for datanode_id in list(range(datanode_number)))
+
+    # print(reduce_decisions)
 
 
 def thread_jobtracker():
@@ -149,7 +239,7 @@ def thread_jobtracker():
                 task_status = map_feedback_info['status']
                 map_task_id = map_feedback_info['map_task_id']
                 if task_status == "FINISH":
-                    print("map finished " + map_task_id)
+                    print("map task finished " + map_task_id)
             elif map_feedback_info['type'] == 'MAP_DATANODE_DONE':
                 datanode_id = map_feedback_info['datanode_id']
                 datanode_progress_info[datanode_id] = "MAP_DATANODE_DONE"
@@ -207,13 +297,13 @@ def thread_datanode_tracker(sock, addr, id):
             # waiting for map tasks feedback
             while True:
                 map_feedback_info = get_json_echo(sock)
-                type = map_feedback_info['type']
-                if type == "MAP_TASK_DONE":
+                feedback_type = map_feedback_info['type']
+                if feedback_type == "MAP_TASK_DONE":
                     datanodes_feedback_queue.put(map_feedback_info)
-                elif type == "MAP_PARTITION_INFO":
+                elif feedback_type == "MAP_PARTITION_INFO":
                     # for map partition info, add to partition info queue
                     partition_info_queue.put(map_feedback_info)
-                elif type == "MAP_DATANODE_DONE":
+                elif feedback_type == "MAP_DATANODE_DONE":
                     # if assigned map tasks all done, break
                     datanodes_feedback_queue.put(map_feedback_info)
                     break

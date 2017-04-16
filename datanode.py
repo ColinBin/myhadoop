@@ -1,11 +1,8 @@
 import socket
 from config import *
 from tools import *
-import os
-import shutil
 import queue
 import threading
-import json
 from app_route import *
 from utilities import *
 from functools import reduce
@@ -13,6 +10,7 @@ from functools import reduce
 datanode_id_self = None
 datanodes_address = None
 local_dir = None
+map_merged_dir = None
 reduce_output_dir = None
 
 map_task_queue = queue.Queue(maxsize=0)         # map task queue
@@ -26,7 +24,7 @@ def datanode_start():
     
     """
     log("START", "namenode started")
-    global datanode_id_self, datanodes_address, local_dir, reduce_output_dir
+    global datanode_id_self, datanodes_address, local_dir, reduce_output_dir, map_merged_dir
     # connect namenode
     namenode_ip = net_config['namenode_ip']
     namenode_port = net_config['namenode_port_in']
@@ -60,6 +58,10 @@ def datanode_start():
             local_dir = os.path.join(datanode_dir, str(datanode_id_self))
             check_and_make_directory(local_dir)
             log("FS", "temporary directory ready for " + job_name)
+
+            # directory for storing merged map output, created when merging map results
+            map_merged_dir = os.path.join(local_dir, "map_merged")
+
             reduce_output_dir = os.path.join(output_dir, str(datanode_id_self))
             check_and_make_directory(reduce_output_dir)
             log("FS", "output directory ready for " + job_name)
@@ -78,7 +80,7 @@ def do_the_job(sock, job_name, input_dir, output_dir):
     :return: 
     
     """
-    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue
+    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir
 
     # keep track of map tasks locally
     map_task_local_tracker = dict()
@@ -124,8 +126,12 @@ def do_the_job(sock, job_name, input_dir, output_dir):
                 # get next feedback
                 break
         else:
+            # merge map output,
+            log("JOB", "map tasks done, start merging files")
+            merge_map_output(local_dir, map_merged_dir, partition_number)
+            log("JOB", "finish merging map results")
+
             # send all-done info and break while loop
-            log("JOB", "map tasks done")
             map_datanode_done_info = {'type': "MAP_DATANODE_DONE", "datanode_id": datanode_id_self}
             send_json_check_echo(sock, map_datanode_done_info)
             break

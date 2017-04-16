@@ -1,5 +1,4 @@
 import socket
-import json
 from config import *
 from tools import *
 

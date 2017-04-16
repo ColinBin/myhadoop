@@ -45,4 +45,9 @@ while True:
             break
     else:
         break
+n[3] = n.get(3, 32) + 3
+print(n[3])
 
+a = [1,2,3]
+b = [4,5,6]
+print(a + b)
