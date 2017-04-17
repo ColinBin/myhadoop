@@ -35,7 +35,7 @@ def datanode_start():
 
     # get file server port and start file server for shuffle
     file_server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    file_server_sock.bind(('localhost', 0))
+    file_server_sock.bind(('0.0.0.0', 0))
     file_server_port = file_server_sock.getsockname()[1]
 
     file_server_thread = threading.Thread(target=file_server, args=(file_server_sock,))

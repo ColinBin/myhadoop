@@ -41,7 +41,7 @@ def namenode_start():
     # bind and listen inside-port
     namenode_port_in = net_config['namenode_port_in']
     server_sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock_in.bind(('localhost', namenode_port_in))
+    server_sock_in.bind(('0.0.0.0', namenode_port_in))
     server_sock_in.listen()
 
     # connect with datanodes, start datanode tracker threads
@@ -67,7 +67,7 @@ def namenode_start():
     # bind and listen outside port, waiting for submitted jobs
     namenode_port_out = net_config['namenode_port_out']
     server_sock_out = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_sock_out.bind(('localhost', namenode_port_out))
+    server_sock_out.bind(('0.0.0.0', namenode_port_out))
     server_sock_out.listen()
     client_threads = []
     while True:
