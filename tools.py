@@ -98,6 +98,35 @@ def send_json_check_echo(sock, json_data):
     check_echo_success(sock)
 
 
+def send_file(sock, file_path):
+    """Send file and check echo data
+    
+    :param sock: 
+    :param file_path: 
+    :return: 
+    
+    """
+
+    with open(file_path, 'r', encoding='utf-8') as f:
+        file_content = f.read()
+    sock.sendall(file_content.encode())
+
+
+def get_file(sock, target_file_path, max_len=100000):
+    """Get file from sock and write to target_path
+    
+    :param sock: 
+    :param target_file_path: 
+    :param max_len: 
+    :return: 
+    
+    """
+    # TODO use loop to receive large file until received size is 0
+    file_content_bytes = sock.recv(max_len)
+    with open(target_file_path, 'w', encoding='utf-8') as f:
+        f.write(file_content_bytes.decode('utf-8'))
+
+
 def check_and_make_directory(dir_path):
     """Check whether dir_path exists, if exists, remove and remake 
     
@@ -107,3 +136,4 @@ def check_and_make_directory(dir_path):
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
     os.mkdir(dir_path, 0o755)
+

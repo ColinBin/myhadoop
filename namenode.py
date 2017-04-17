@@ -34,21 +34,27 @@ def namenode_start():
     # create task queues
     task_queues = [queue.Queue(maxsize=0) for number in list(range(datanode_number))]
 
+    # clear datanode dir
+    datanode_dir = fs_config['datanode_dir']
+    check_and_make_directory(datanode_dir)
+
     # bind and listen inside-port
     namenode_port_in = net_config['namenode_port_in']
     server_sock_in = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_sock_in.bind(('localhost', namenode_port_in))
     server_sock_in.listen()
 
-    # clear datanode dir
-    datanode_dir = fs_config['datanode_dir']
-    check_and_make_directory(datanode_dir)
-
     # connect with datanodes, start datanode tracker threads
     datanode_tracker_threads = []
     for number in list(range(datanode_number)):
         sock, addr = server_sock_in.accept()
         datanode_ad_info_per = {"ip": addr[0], "port": addr[1]}
+
+        # record file server port of this datanode
+        file_server_port_info = get_json_echo(sock)
+        if file_server_port_info['type'] == "FILE_SERVER_PORT":
+            datanode_ad_info_per['file_server_port'] = file_server_port_info['file_server_port']
+
         datanode_address_keeper[number] = datanode_ad_info_per
         datanode_tracker_thread = threading.Thread(target=thread_datanode_tracker, args=(sock, addr, number))
         datanode_tracker_threads.append(datanode_tracker_thread)
@@ -117,11 +123,16 @@ def schedule(partition_info_tracker):
     :return: 
     
     """
-    global datanode_number
+    global datanode_number, task_queues
 
     # schedule plan to return
-    shuffle_queues = dict()
-    reduce_queues = dict()
+    shuffle_task_lists = dict()
+    reduce_task_lists = dict()
+
+    # initialize
+    for datanode_id in list(range(datanode_number)):
+        shuffle_task_lists[datanode_id] = []
+        reduce_task_lists[datanode_id] = []
 
     # locality matrices of size datanode_number * partition_number
     internal_locality = [[0 for partition_id in list(range(partition_number))] for datanode_id in list(range(datanode_number))]
@@ -182,6 +193,23 @@ def schedule(partition_info_tracker):
                     current_partition_id = partition_id
         reduce_decisions[current_partition_id] = current_datanode_id
         datanode_load[current_datanode_id] = datanode_load[current_datanode_id] + sum(partition_info_tracker[datanode_id][current_partition_id] for datanode_id in list(range(datanode_number)))
+
+    # assign reduce and shuffle tasks
+    for partition_id in list(range(partition_number)):
+        target_datanode_id = reduce_decisions[partition_id]
+        for datanode_id in list(range(datanode_number)):
+            if datanode_id == target_datanode_id:
+                reduce_task_lists[datanode_id].append(partition_id)
+            else:
+                shuffle_task_lists[datanode_id].append(partition_id)
+
+    for datanode_id in list(range(datanode_number)):
+        reduce_tasks_datanode = reduce_task_lists[datanode_id]
+        shuffle_tasks_datanode = shuffle_task_lists[datanode_id]
+
+        # send to the task queues
+        shuffle_and_reduce_task_info = {"type": "SHUFFLE_AND_REDUCE", "reduce_tasks": reduce_tasks_datanode, "shuffle_tasks": shuffle_tasks_datanode}
+        task_queues[datanode_id].put(shuffle_and_reduce_task_info)
 
     # print(reduce_decisions)
 
@@ -253,6 +281,8 @@ def thread_jobtracker():
                     partition_info_queue.put(map_all_done_scheduler_info)
                     break
 
+        # wait for shuffle and reduce feedback
+
 
 def thread_datanode_tracker(sock, addr, id):
     """Assign tasks, exchange information with datanodes via socket
@@ -307,6 +337,14 @@ def thread_datanode_tracker(sock, addr, id):
                     # if assigned map tasks all done, break
                     datanodes_feedback_queue.put(map_feedback_info)
                     break
+
+            # receive shuffle and reduce task
+            shuffle_and_reduce_task_info = task_queues[id].get()
+            task_type = shuffle_and_reduce_task_info['type']
+            if task_type == "SHUFFLE_AND_REDUCE":
+                send_json_check_echo(sock, shuffle_and_reduce_task_info)
+
+            # waiting for shuffle and reduce feedback
 
 
         # feedback_info = {"status": "SUCCESS", "message": "job done"}

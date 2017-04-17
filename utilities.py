@@ -84,9 +84,10 @@ def merge_partition_info(current_info, new_info):
         current_info[partition_id] = current_info.get(partition_id, 0) + new_info[str(partition_id)]
 
 
-def merge_map_output(local_dir, target_dir, partition_number):
+def merge_map_output(local_dir, map_merged_dir, target_dir, partition_number):
     """Merge map tasks output and put in target directory
     
+    :param map_merged_dir
     :param target_dir
     :param local_dir: 
     :param partition_number: 
@@ -94,7 +95,7 @@ def merge_map_output(local_dir, target_dir, partition_number):
      
     """
     # record task path for each map task
-    map_task_dirs = [os.path.join(local_dir, map_task_dir) for map_task_dir in os.listdir(local_dir) if os.path.isdir(os.path.join(local_dir, map_task_dir))]
+    map_task_dirs = [os.path.join(local_dir, map_task_dir) for map_task_dir in os.listdir(local_dir) if os.path.isdir(os.path.join(local_dir, map_task_dir)) and os.path.normpath(os.path.join(local_dir, map_task_dir)) != os.path.normpath(map_merged_dir)]
 
     # make target dir
     check_and_make_directory(target_dir)

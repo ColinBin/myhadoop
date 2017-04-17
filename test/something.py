@@ -1,6 +1,7 @@
 import json
 import queue
 from itertools import groupby
+import os
 
 class App(object):
 
@@ -51,3 +52,8 @@ print(n[3])
 a = [1,2,3]
 b = [4,5,6]
 print(a + b)
+
+local_path = "."
+io_path = os.path.join(local_path, "io")
+dirs = [d for d in os.listdir(local_path) if os.path.isdir(os.path.join(local_path, d)) and os.path.normpath(os.path.join(local_path, d)) != os.path.normpath(io_path)]
+print(dirs)

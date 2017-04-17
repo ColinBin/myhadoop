@@ -11,10 +11,13 @@ datanode_id_self = None
 datanodes_address = None
 local_dir = None
 map_merged_dir = None
+map_merged_self_dir = None
 reduce_output_dir = None
 
 map_task_queue = queue.Queue(maxsize=0)         # map task queue
 map_feedback_queue = queue.Queue(maxsize=0)     # feedback from map tasks
+
+shuffle_task_queue = queue.Queue(maxsize=0)     # shuffle task queue
 
 
 def datanode_start():
@@ -30,6 +33,18 @@ def datanode_start():
     namenode_port = net_config['namenode_port_in']
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((namenode_ip, namenode_port))
+
+    # get file server port and start file server for shuffle
+    file_server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    file_server_sock.bind(('localhost', 0))
+    file_server_port = file_server_sock.getsockname()[1]
+
+    file_server_thread = threading.Thread(target=file_server, args=(file_server_sock,))
+    file_server_thread.start()
+
+    # send file server port info
+    file_server_port_info = {'type': "FILE_SERVER_PORT", "file_server_port": file_server_port}
+    send_json_check_echo(sock, file_server_port_info)
 
     # get datanodes address information
     datanodes_ad_info = get_json_echo(sock)
@@ -59,8 +74,9 @@ def datanode_start():
             check_and_make_directory(local_dir)
             log("FS", "temporary directory ready for " + job_name)
 
-            # directory for storing merged map output, created when merging map results
+            # directory for storing merged map output,
             map_merged_dir = os.path.join(local_dir, "map_merged")
+            check_and_make_directory(map_merged_dir)
 
             reduce_output_dir = os.path.join(output_dir, str(datanode_id_self))
             check_and_make_directory(reduce_output_dir)
@@ -80,7 +96,7 @@ def do_the_job(sock, job_name, input_dir, output_dir):
     :return: 
     
     """
-    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir
+    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir
 
     # keep track of map tasks locally
     map_task_local_tracker = dict()
@@ -128,7 +144,9 @@ def do_the_job(sock, job_name, input_dir, output_dir):
         else:
             # merge map output,
             log("JOB", "map tasks done, start merging files")
-            merge_map_output(local_dir, map_merged_dir, partition_number)
+            map_merged_self_dir = os.path.join(map_merged_dir, str(datanode_id_self))
+
+            merge_map_output(local_dir, map_merged_dir, map_merged_self_dir, partition_number)
             log("JOB", "finish merging map results")
 
             # send all-done info and break while loop
@@ -136,12 +154,98 @@ def do_the_job(sock, job_name, input_dir, output_dir):
             send_json_check_echo(sock, map_datanode_done_info)
             break
 
+    # receive shuffle and reduce task
+    shuffle_and_reduce_task_info = get_json_echo(sock)
+    task_type = shuffle_and_reduce_task_info['type']
+    if task_type == 'SHUFFLE_AND_REDUCE':
+        shuffle_task_list = shuffle_and_reduce_task_info['shuffle_tasks']
+        reduce_task_list = shuffle_and_reduce_task_info['reduce_tasks']
 
-def thread_map_task():
-    """Fetch map tasks from the queue and execute, send feedback to feedback queue
+        # shuffle thread list
+        shuffle_thread_list = []
+
+        # create socket with each datanode other than self
+        for datanode_id, addr_info in datanodes_address.items():
+            if int(datanode_id) != datanode_id_self:
+                # start shuffle task fetching files from each datanode
+                target_datanode_ip = addr_info['ip']
+                target_datanode_file_server_port = addr_info['file_server_port']
+                shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, shuffle_task_list))
+                shuffle_thread_list.append(shuffle_thread)
+
+        for shuffle_thread in shuffle_thread_list:
+            shuffle_thread.start()
+        for shuffle_thread in shuffle_thread_list:
+            shuffle_thread.join()
+
+        log("JOB", "shuffling done")
+
+        # start final reduce
+
+
+def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port, shuffle_task_list):
+    """Create socket and fetch files from datanode
     
     :return: 
     
+    """
+    global map_merged_dir, datanodes_address, shuffle_task_queue, datanode_id_self
+    file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    file_client_sock.connect((target_datanode_ip, file_server_port))
+
+    # make directory for storing map result from datanode
+    local_dir_datanode = os.path.join(map_merged_dir, str(target_datanode_id))
+    check_and_make_directory(local_dir_datanode)
+
+    for target_partition_id in shuffle_task_list:
+        file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id}
+        send_json(file_client_sock, file_request_info)
+        target_file_path = os.path.join(local_dir_datanode, str(target_partition_id))
+        get_file(file_client_sock, target_file_path)
+    file_request_over_info = {'type': "FILE_REQUEST_OVER"}
+    send_json(file_client_sock, file_request_over_info)
+    file_client_sock.close()
+
+
+def file_server(file_server_sock):
+    """File server for shuffle
+    
+    :param file_server_sock
+    :return:
+     
+    """
+    file_server_sock.listen()
+    while True:
+        sock, addr = file_server_sock.accept()
+        serve_file_thread = threading.Thread(target=thread_serve_file, args=(sock,))
+        serve_file_thread.start()
+
+
+def thread_serve_file(sock):
+    """Thread serving files through socket
+    
+    :param sock: 
+    :return: 
+    
+    """
+    global map_merged_dir
+    while True:
+        file_request_info = get_json(sock)
+        request_type = file_request_info['type']
+        if request_type == "FILE_REQUEST":
+            target_partition_id = file_request_info['partition_id']
+            target_partition_file_path = os.path.join(map_merged_self_dir, str(target_partition_id))
+            send_file(sock, target_partition_file_path)
+        elif request_type == "FILE_REQUEST_OVER":
+            sock.close()
+            break
+
+
+def thread_map_task():
+    """Fetch map tasks from the queue and execute, send feedback to feedback queue
+
+    :return: 
+
     """
     global map_task_queue, map_feedback_queue, datanode_id_self, local_dir
 
@@ -173,17 +277,14 @@ def thread_map_task():
         partition_info = partition_sorted(sorted_map_result, map_task_dir)
 
         # send partition info for scheduling
-        map_partition_info = {'type': "MAP_PARTITION_INFO", "map_task_id": map_task_id, "datanode_id": datanode_id_self, 'partition_info': partition_info}
+        map_partition_info = {'type': "MAP_PARTITION_INFO", "map_task_id": map_task_id, "datanode_id": datanode_id_self,
+                              'partition_info': partition_info}
         map_feedback_queue.put(map_partition_info)
 
         # send task done info
-        map_task_done_info = {"type": "MAP_TASK_DONE", "job_name": job_name, "map_task_id": map_task_id, "status": "FINISH", "datanode_id": datanode_id_self}
+        map_task_done_info = {"type": "MAP_TASK_DONE", "job_name": job_name, "map_task_id": map_task_id,
+                              "status": "FINISH", "datanode_id": datanode_id_self}
         map_feedback_queue.put(map_task_done_info)
-
-
-def shuffle():
-
-    pass
 
 
 def reduce():
