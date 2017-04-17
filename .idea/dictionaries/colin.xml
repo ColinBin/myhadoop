@@ -5,6 +5,7 @@
       <w>groupby</w>
       <w>jobtracker</w>
       <w>mkdir</w>
+      <w>recv</w>
       <w>tasktracker</w>
     </words>
   </dictionary>

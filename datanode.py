@@ -12,12 +12,11 @@ datanodes_address = None
 local_dir = None
 map_merged_dir = None
 map_merged_self_dir = None
-reduce_output_dir = None
+map_merged_final_dir = None
+reduce_output_datanode_dir = None
 
 map_task_queue = queue.Queue(maxsize=0)         # map task queue
 map_feedback_queue = queue.Queue(maxsize=0)     # feedback from map tasks
-
-shuffle_task_queue = queue.Queue(maxsize=0)     # shuffle task queue
 
 
 def datanode_start():
@@ -27,7 +26,7 @@ def datanode_start():
     
     """
     log("START", "namenode started")
-    global datanode_id_self, datanodes_address, local_dir, reduce_output_dir, map_merged_dir
+    global datanode_id_self, datanodes_address, local_dir, reduce_output_datanode_dir, map_merged_dir
     # connect namenode
     namenode_ip = net_config['namenode_ip']
     namenode_port = net_config['namenode_port_in']
@@ -78,8 +77,8 @@ def datanode_start():
             map_merged_dir = os.path.join(local_dir, "map_merged")
             check_and_make_directory(map_merged_dir)
 
-            reduce_output_dir = os.path.join(output_dir, str(datanode_id_self))
-            check_and_make_directory(reduce_output_dir)
+            reduce_output_datanode_dir = os.path.join(output_dir, str(datanode_id_self))
+            check_and_make_directory(reduce_output_datanode_dir)
             log("FS", "output directory ready for " + job_name)
 
             # call do_the_job
@@ -96,7 +95,7 @@ def do_the_job(sock, job_name, input_dir, output_dir):
     :return: 
     
     """
-    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir
+    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir, reduce_output_datanode_dir, map_merged_final_dir
 
     # keep track of map tasks locally
     map_task_local_tracker = dict()
@@ -170,7 +169,8 @@ def do_the_job(sock, job_name, input_dir, output_dir):
                 # start shuffle task fetching files from each datanode
                 target_datanode_ip = addr_info['ip']
                 target_datanode_file_server_port = addr_info['file_server_port']
-                shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, shuffle_task_list))
+                # get file in the reduce list for current datanode
+                shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, reduce_task_list))
                 shuffle_thread_list.append(shuffle_thread)
 
         for shuffle_thread in shuffle_thread_list:
@@ -180,7 +180,18 @@ def do_the_job(sock, job_name, input_dir, output_dir):
 
         log("JOB", "shuffling done")
 
-        # start final reduce
+        # final merge
+        map_merged_final_dir = os.path.join(map_merged_dir, "final")
+        check_and_make_directory(map_merged_final_dir)
+        merge_map_output_final(map_merged_dir, map_merged_final_dir, reduce_task_list, len(datanodes_address))
+        log("JOB", "final merge done")
+
+        # final reduce
+        app = app_route_info[job_name]()
+        reduce_fun = app.reduce
+        final_reduce(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, reduce_task_list)
+
+        log("JOB", "final reduce done")
 
 
 def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port, shuffle_task_list):
@@ -189,7 +200,7 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     :return: 
     
     """
-    global map_merged_dir, datanodes_address, shuffle_task_queue, datanode_id_self
+    global map_merged_dir, datanodes_address, datanode_id_self
     file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     file_client_sock.connect((target_datanode_ip, file_server_port))
 

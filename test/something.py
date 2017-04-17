@@ -24,17 +24,13 @@ f['first'] = App
 
 f['first']().reduce("Colin")
 
-h = [("Hello", 1), ("Hello", 1), ("Jack", 1), ("Jack", 1), ("Moon", 1), ("Moon", 1)]
-for k, g in groupby(h, key=keyfunc):
-    print(k)
-    print(len(list(g)))
+
 
 print(isinstance('Colin', str))
 
 print(sum(bytearray(b"A")))
 
 l = list("[1, 2, 3, 4]")
-print(h)
 
 n = dict()
 n['name'] = "Colin"
@@ -57,3 +53,13 @@ local_path = "."
 io_path = os.path.join(local_path, "io")
 dirs = [d for d in os.listdir(local_path) if os.path.isdir(os.path.join(local_path, d)) and os.path.normpath(os.path.join(local_path, d)) != os.path.normpath(io_path)]
 print(dirs)
+
+di = {"1":"fsfs", "31": [2,3,4], 213:{"1":323, "2":"fafaf"}}
+print(len(di))
+print(os.path.join(".", "input", "partition1"))
+
+
+h = [("Hello", 1), ("Hello", 1), ("Jack", 1), ("Jack", 1), ("Moon", 1), ("Moon", 1)]
+for k, g in groupby(h, key=keyfunc):
+    print(k)
+    print(list(g))

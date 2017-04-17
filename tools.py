@@ -112,7 +112,7 @@ def send_file(sock, file_path):
     sock.sendall(file_content.encode())
 
 
-def get_file(sock, target_file_path, max_len=100000):
+def get_file(sock, target_file_path, max_len=4096):
     """Get file from sock and write to target_path
     
     :param sock: 
@@ -122,9 +122,9 @@ def get_file(sock, target_file_path, max_len=100000):
     
     """
     # TODO use loop to receive large file until received size is 0
-    file_content_bytes = sock.recv(max_len)
+    file_content = recv_all(sock)
     with open(target_file_path, 'w', encoding='utf-8') as f:
-        f.write(file_content_bytes.decode('utf-8'))
+        f.write(file_content)
 
 
 def check_and_make_directory(dir_path):
@@ -137,3 +137,18 @@ def check_and_make_directory(dir_path):
         shutil.rmtree(dir_path)
     os.mkdir(dir_path, 0o755)
 
+
+def recv_all(sock):
+    """Keep receiving data until EOF 
+    
+    :param sock
+    :return
+    """
+    buff_size = 4096
+    data = ""
+    while True:
+        part = sock.recv(buff_size)
+        data = data + part.decode('utf-8')
+        if len(part) < buff_size:
+            break
+    return data
