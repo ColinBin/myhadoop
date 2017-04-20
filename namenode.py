@@ -1,5 +1,4 @@
 import socket
-from check import check_dir
 from config import *
 import threading
 from tools import *
@@ -364,7 +363,7 @@ def thread_client(sock, addr):
     if job_info['type'] == "NEW_JOB":
         job_name = job_info['job_name']
         job_fs_path = job_info['job_fs_path']
-        input_dir, output_dir, input_file_list = check_dir(job_fs_path)            # check dir for the job
+        input_dir, output_dir, input_file_list = check_dir_for_job(job_fs_path)            # check dir for the job
         if len(input_file_list) <= 0:
             feedback_info = {"type": "FEEDBACK", "status": "ERROR", "message": "checking directories failed"}
             send_json(sock, feedback_info)

@@ -3,6 +3,7 @@
     <words>
       <w>addr</w>
       <w>groupby</w>
+      <w>hdfs</w>
       <w>jobtracker</w>
       <w>mkdir</w>
       <w>recv</w>

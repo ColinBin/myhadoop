@@ -27,6 +27,14 @@ def datanode_start():
     """
     log("START", "namenode started")
     global datanode_id_self, datanodes_address, local_dir, reduce_output_datanode_dir, map_merged_dir
+
+    # to simulate hdfs datanodes should have the same file system structure as the namenode
+    output_dir = fs_config['output_dir']
+    check_and_make_directory(output_dir)
+
+    datanode_dir = fs_config['datanode_dir']
+    check_and_make_directory(datanode_dir)
+
     # connect namenode
     namenode_ip = net_config['namenode_ip']
     namenode_port = net_config['namenode_port_in']
@@ -62,13 +70,12 @@ def datanode_start():
         # if there is a new job
         if task_info['type'] == "NEW_JOB":
             job_name = task_info['job_name']
-            input_dir = task_info['input_dir']
-            output_dir = task_info['output_dir']
+            job_input_dir = task_info['input_dir']
+            job_output_dir = task_info['output_dir']
             log("JOB", "job started --> " + job_name)
 
             # make temporary directory and reduce output directory for self
             # if directories exist, remove and make
-            datanode_dir = fs_config['datanode_dir']
             local_dir = os.path.join(datanode_dir, str(datanode_id_self))
             check_and_make_directory(local_dir)
             log("FS", "temporary directory ready for " + job_name)
@@ -82,7 +89,7 @@ def datanode_start():
             log("FS", "output directory ready for " + job_name)
 
             # call do_the_job
-            do_the_job(sock, job_name, input_dir, output_dir)
+            do_the_job(sock, job_name, job_input_dir, job_output_dir)
 
 
 def do_the_job(sock, job_name, input_dir, output_dir):
@@ -202,7 +209,6 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     """
     global map_merged_dir, datanodes_address, datanode_id_self
     file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(target_datanode_ip + " " +str(file_server_port))
 
     file_client_sock.connect((target_datanode_ip, file_server_port))
     # make directory for storing map result from datanode
