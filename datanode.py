@@ -17,6 +17,7 @@ reduce_output_datanode_dir = None
 
 map_task_queue = queue.Queue(maxsize=0)         # map task queue
 map_feedback_queue = queue.Queue(maxsize=0)     # feedback from map tasks
+file_server_port_queue = queue.Queue(maxsize=0)
 
 
 def datanode_start():
@@ -41,15 +42,12 @@ def datanode_start():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((namenode_ip, namenode_port))
 
-    # get file server port and start file server for shuffle
-    file_server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    file_server_sock.bind(('0.0.0.0', 0))
-    file_server_port = file_server_sock.getsockname()[1]
-
-    file_server_thread = threading.Thread(target=file_server, args=(file_server_sock,))
+    # start file server thread
+    file_server_thread = threading.Thread(target=file_server)
     file_server_thread.start()
 
     # send file server port info
+    file_server_port = file_server_port_queue.get()
     file_server_port_info = {'type': "FILE_SERVER_PORT", "file_server_port": file_server_port}
     send_json_check_echo(sock, file_server_port_info)
 
@@ -231,13 +229,18 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     file_client_sock.close()
 
 
-def file_server(file_server_sock):
+def file_server():
     """File server for shuffle
     
-    :param file_server_sock
     :return:
      
     """
+    file_server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    file_server_sock.bind(('0.0.0.0', 0))
+    file_server_port = file_server_sock.getsockname()[1]
+
+    # notify about the port
+    file_server_port_queue.put(file_server_port)
     file_server_sock.listen()
     while True:
         sock, addr = file_server_sock.accept()

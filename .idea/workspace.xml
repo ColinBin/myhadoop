@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="Directories checking">
+    <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="File server port queue">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/datanode.py" afterPath="$PROJECT_DIR$/datanode.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/namenode.py" afterPath="$PROJECT_DIR$/namenode.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -41,8 +40,8 @@
       <file leaf-file-name="datanode.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/datanode.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1779">
-              <caret line="312" column="29" lean-forward="true" selection-start-line="312" selection-start-column="29" selection-end-line="312" selection-end-column="29" />
+            <state relative-caret-position="405">
+              <caret line="248" column="0" lean-forward="true" selection-start-line="248" selection-start-column="0" selection-end-line="248" selection-end-column="0" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -148,9 +147,9 @@
         <option value="$PROJECT_DIR$/test/something.py" />
         <option value="$PROJECT_DIR$/check.py" />
         <option value="$PROJECT_DIR$/tools.py" />
-        <option value="$PROJECT_DIR$/datanode.py" />
         <option value="$PROJECT_DIR$/namenode.py" />
         <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/datanode.py" />
       </list>
     </option>
   </component>
@@ -252,7 +251,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.client">
+  <component name="RunManager" selected="Python.datanode">
     <configuration default="false" name="namenode" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -512,7 +511,14 @@
       <option name="project" value="LOCAL" />
       <updated>1492678748997</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Json loads bug fixed">
+      <created>1492697459025</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1492697459025</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TodoView">
@@ -561,7 +567,8 @@
     <MESSAGE value="Listen on all network" />
     <MESSAGE value="Receive size before fetch file" />
     <MESSAGE value="Directories checking" />
-    <option name="LAST_COMMIT_MESSAGE" value="Directories checking" />
+    <MESSAGE value="Json loads bug fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Json loads bug fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -661,6 +668,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="333">
           <caret line="670" column="42" lean-forward="false" selection-start-line="670" selection-start-column="42" selection-end-line="670" selection-end-column="42" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -752,16 +760,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/namenode.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="941">
-          <caret line="379" column="12" lean-forward="false" selection-start-line="379" selection-start-column="12" selection-end-line="379" selection-end-column="12" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/client.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="266">
@@ -778,10 +776,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/namenode.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="941">
+          <caret line="379" column="12" lean-forward="false" selection-start-line="379" selection-start-column="12" selection-end-line="379" selection-end-column="12" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/datanode.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1779">
-          <caret line="312" column="29" lean-forward="true" selection-start-line="312" selection-start-column="29" selection-end-line="312" selection-end-column="29" />
+        <state relative-caret-position="405">
+          <caret line="248" column="0" lean-forward="true" selection-start-line="248" selection-start-column="0" selection-end-line="248" selection-end-column="0" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
