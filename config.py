@@ -8,9 +8,9 @@ general_config = {
 
 # net-related config
 net_config = {
-    "namenode_ip": "45.32.46.113",
-    "namenode_port_in": 1114,
-    "namenode_port_out": 2225,
+    "namenode_ip": "localhost",
+    "namenode_port_in": 1111,
+    "namenode_port_out": 2222,
 }
 
 # file system config

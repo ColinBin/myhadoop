@@ -35,7 +35,7 @@ def get_json(sock, max_length=2048):
      
     """
     data_bytes = sock.recv(max_length)
-    data_json = json.loads(data_bytes)
+    data_json = json.loads(data_bytes.decode('utf-8'))
     return data_json
 
 
@@ -112,17 +112,24 @@ def send_file(sock, file_path):
     sock.sendall(file_content.encode())
 
 
-def get_file(sock, target_file_path, max_len=4096):
+def get_file(sock, target_file_path, file_size):
     """Get file from sock and write to target_path
     
     :param sock: 
     :param target_file_path: 
-    :param max_len: 
+    :param file_size: 
     :return: 
     
     """
-    # TODO use loop to receive large file until received size is 0
-    file_content = recv_all(sock)
+    # TODO use robust io
+    received_length = 0
+    file_content = ""
+    buff_size = 4096
+    while received_length != file_size:
+        part = sock.recv(buff_size).decode('utf-8')
+        file_content = file_content + part
+        received_length += len(part)
+
     with open(target_file_path, 'w', encoding='utf-8') as f:
         f.write(file_content)
 
@@ -137,18 +144,3 @@ def check_and_make_directory(dir_path):
         shutil.rmtree(dir_path)
     os.mkdir(dir_path, 0o755)
 
-
-def recv_all(sock):
-    """Keep receiving data until EOF 
-    
-    :param sock
-    :return
-    """
-    buff_size = 4096
-    data = ""
-    while True:
-        part = sock.recv(buff_size)
-        data = data + part.decode('utf-8')
-        if len(part) < buff_size:
-            break
-    return data

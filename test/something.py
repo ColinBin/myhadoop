@@ -63,3 +63,15 @@ h = [("Hello", 1), ("Hello", 1), ("Jack", 1), ("Jack", 1), ("Moon", 1), ("Moon",
 for k, g in groupby(h, key=keyfunc):
     print(k)
     print(list(g))
+
+
+to_send = {"name": "Jack", "age": 22}
+fin = json.dumps(to_send).encode() + b'\n' * (50 - len(json.dumps(to_send).encode()))
+print(json.dumps(to_send).encode())
+print(fin)
+print(len(fin))
+json_data = json.loads(fin.decode('utf-8'))
+print(json_data['name'])
+
+stat_info = os.stat("something.py")
+print(stat_info.st_size)

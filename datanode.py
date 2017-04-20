@@ -202,8 +202,9 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     """
     global map_merged_dir, datanodes_address, datanode_id_self
     file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    file_client_sock.connect((target_datanode_ip, file_server_port))
+    print(target_datanode_ip + " " +str(file_server_port))
 
+    file_client_sock.connect((target_datanode_ip, file_server_port))
     # make directory for storing map result from datanode
     local_dir_datanode = os.path.join(map_merged_dir, str(target_datanode_id))
     check_and_make_directory(local_dir_datanode)
@@ -211,8 +212,14 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     for target_partition_id in shuffle_task_list:
         file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id}
         send_json(file_client_sock, file_request_info)
-        target_file_path = os.path.join(local_dir_datanode, str(target_partition_id))
-        get_file(file_client_sock, target_file_path)
+
+        # get file size info
+        file_size_info = get_json_echo(file_client_sock)
+        if file_size_info['type'] == "FILE_SIZE":
+            file_size = file_size_info['file_size']
+            target_file_path = os.path.join(local_dir_datanode, str(target_partition_id))
+            get_file(file_client_sock, target_file_path, file_size)
+
     file_request_over_info = {'type': "FILE_REQUEST_OVER"}
     send_json(file_client_sock, file_request_over_info)
     file_client_sock.close()
@@ -246,6 +253,11 @@ def thread_serve_file(sock):
         if request_type == "FILE_REQUEST":
             target_partition_id = file_request_info['partition_id']
             target_partition_file_path = os.path.join(map_merged_self_dir, str(target_partition_id))
+
+            # send file size information
+            file_size_info = {"type": "FILE_SIZE", "file_size": os.stat(target_partition_file_path).st_size}
+            send_json_check_echo(sock, file_size_info)
+
             send_file(sock, target_partition_file_path)
         elif request_type == "FILE_REQUEST_OVER":
             sock.close()
