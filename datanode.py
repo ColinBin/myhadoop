@@ -157,7 +157,7 @@ def do_the_job(sock, job_name, input_dir, output_dir):
 
             # send all-done info and break while loop
             map_datanode_done_info = {'type': "MAP_DATANODE_DONE", "datanode_id": datanode_id_self}
-            send_json_check_echo(sock, map_datanode_done_info)
+            send_json(sock, map_datanode_done_info)
             break
 
     # receive shuffle and reduce task

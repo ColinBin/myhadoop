@@ -325,15 +325,18 @@ def thread_datanode_tracker(sock, addr, id):
 
             # waiting for map tasks feedback
             while True:
-                map_feedback_info = get_json_echo(sock)
+                map_feedback_info = get_json(sock)
                 feedback_type = map_feedback_info['type']
                 if feedback_type == "MAP_TASK_DONE":
+                    send_echo_success(sock)
                     datanodes_feedback_queue.put(map_feedback_info)
                 elif feedback_type == "MAP_PARTITION_INFO":
+                    send_echo_success(sock)
                     # for map partition info, add to partition info queue
                     partition_info_queue.put(map_feedback_info)
                 elif feedback_type == "MAP_DATANODE_DONE":
                     # if assigned map tasks all done, break
+                    # when datanode done, do not send echo!!!
                     datanodes_feedback_queue.put(map_feedback_info)
                     break
 
