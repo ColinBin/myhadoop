@@ -4,6 +4,7 @@ import threading
 from tools import *
 import queue
 from utilities import *
+from robust_socket_io import *
 
 datanode_number = general_config['datanode_number']
 
@@ -15,7 +16,6 @@ datanodes_feedback_queue = queue.Queue(maxsize=0)   # queue for receiving feedba
 client_feedback_queue = queue.Queue(maxsize=0)      # feedback queue for clients
 partition_info_queue = queue.Queue(maxsize=0)       # partition info queue
 datanode_address_keeper = dict()        # relate datanode id with ip and port
-
 
 def namenode_start():
     """Entrance function for namenode
@@ -49,13 +49,14 @@ def namenode_start():
         sock, addr = server_sock_in.accept()
         datanode_ad_info_per = {"ip": addr[0], "port": addr[1]}
 
+        rsock = RSockIO(sock)
         # record file server port of this datanode
-        file_server_port_info = get_json_echo(sock)
+        file_server_port_info = get_json(rsock)
         if file_server_port_info['type'] == "FILE_SERVER_PORT":
             datanode_ad_info_per['file_server_port'] = file_server_port_info['file_server_port']
 
         datanode_address_keeper[number] = datanode_ad_info_per
-        datanode_tracker_thread = threading.Thread(target=thread_datanode_tracker, args=(sock, addr, number))
+        datanode_tracker_thread = threading.Thread(target=thread_datanode_tracker, args=(rsock, addr, number))
         datanode_tracker_threads.append(datanode_tracker_thread)
     server_sock_in.close()
     for datanode_thread in datanode_tracker_threads:
@@ -71,7 +72,8 @@ def namenode_start():
     client_threads = []
     while True:
         sock, addr = server_sock_out.accept()
-        client_thread = threading.Thread(target=thread_client, args=(sock, addr))
+        rsock = RSockIO(sock)
+        client_thread = threading.Thread(target=thread_client, args=(rsock, addr))
         client_threads.append(client_thread)
         client_thread.start()
 
@@ -283,10 +285,10 @@ def thread_jobtracker():
         # wait for shuffle and reduce feedback
 
 
-def thread_datanode_tracker(sock, addr, id):
+def thread_datanode_tracker(rsock, addr, id):
     """Assign tasks, exchange information with datanodes via socket
     
-    :param sock: 
+    :param rsock: 
     :param addr: 
     :return:
      
@@ -295,7 +297,7 @@ def thread_datanode_tracker(sock, addr, id):
 
     # send datanode address information
     datanode_ad_info = {"type": "DATANODES_AD", "content": datanode_address_keeper, "id_self": id}
-    send_json_check_echo(sock, datanode_ad_info)
+    send_json(rsock, datanode_ad_info)
 
     while True:
         task_info = task_queues[id].get()
@@ -305,7 +307,7 @@ def thread_datanode_tracker(sock, addr, id):
         map_tasks_id_list = []
         if task_type == "NEW_JOB":
             # send and check echo
-            send_json_check_echo(sock, task_info)
+            send_json(rsock, task_info)
 
             # for the current job, send map tasks to this datanodes
             while True:
@@ -317,7 +319,7 @@ def thread_datanode_tracker(sock, addr, id):
                     map_tasks_id_list.append(task_info['map_task_id'])
 
                 # send map task info and check echo
-                send_json_check_echo(sock, task_info)
+                send_json(rsock, task_info)
 
                 # if no more map tasks, break
                 if task_type == "MAP_TASK_ASSIGNMENT_END":
@@ -325,18 +327,15 @@ def thread_datanode_tracker(sock, addr, id):
 
             # waiting for map tasks feedback
             while True:
-                map_feedback_info = get_json(sock)
+                map_feedback_info = get_json(rsock)
                 feedback_type = map_feedback_info['type']
                 if feedback_type == "MAP_TASK_DONE":
-                    send_echo_success(sock)
                     datanodes_feedback_queue.put(map_feedback_info)
                 elif feedback_type == "MAP_PARTITION_INFO":
-                    send_echo_success(sock)
                     # for map partition info, add to partition info queue
                     partition_info_queue.put(map_feedback_info)
                 elif feedback_type == "MAP_DATANODE_DONE":
                     # if assigned map tasks all done, break
-                    # when datanode done, do not send echo!!!
                     datanodes_feedback_queue.put(map_feedback_info)
                     break
 
@@ -344,16 +343,12 @@ def thread_datanode_tracker(sock, addr, id):
             shuffle_and_reduce_task_info = task_queues[id].get()
             task_type = shuffle_and_reduce_task_info['type']
             if task_type == "SHUFFLE_AND_REDUCE":
-                send_json_check_echo(sock, shuffle_and_reduce_task_info)
+                send_json(rsock, shuffle_and_reduce_task_info)
 
             # waiting for shuffle and reduce feedback
 
 
-        # feedback_info = {"status": "SUCCESS", "message": "job done"}
-        # client_feedback_queue.put(feedback_info)
-
-
-def thread_client(sock, addr):
+def thread_client(rsock, addr):
     """Obtain jobs to run
     
     :param sock: 
@@ -361,7 +356,7 @@ def thread_client(sock, addr):
     :return: 
     
     """
-    job_info = get_json(sock)
+    job_info = get_json(rsock)
     # if a new job is submitted, make a record in the queue
     if job_info['type'] == "NEW_JOB":
         job_name = job_info['job_name']
@@ -369,16 +364,16 @@ def thread_client(sock, addr):
         input_dir, output_dir, input_file_list = check_dir_for_job(job_fs_path)            # check dir for the job
         if len(input_file_list) <= 0:
             feedback_info = {"type": "FEEDBACK", "status": "ERROR", "message": "checking directories failed"}
-            send_json(sock, feedback_info)
+            send_json(rsock, feedback_info)
             return
         feedback_info = {"type": "FEEDBACK", "status": "INFO", "message": "checking directories succeeded"}
-        send_json(sock, feedback_info)
+        send_json(rsock, feedback_info)
         job_queue_tracker.put({"job_name": job_name, "input_dir": input_dir,"output_dir": output_dir, "input_file_list": input_file_list})
 
         # keep sending feedback until SUCCESS
         while True:
             feedback_info = client_feedback_queue.get()
-            send_json(sock, feedback_info)
+            send_json(rsock, feedback_info)
             if feedback_info['status'] == "SUCCESS":
                 break
 

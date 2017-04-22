@@ -71,7 +71,10 @@ print(json.dumps(to_send).encode())
 print(fin)
 print(len(fin))
 json_data = json.loads(fin.decode('utf-8'))
+print(isinstance(json_data, dict))
 print(json_data['name'])
 
 stat_info = os.stat("something.py")
 print(stat_info.st_size)
+
+print(isinstance(b"faf", bytes))

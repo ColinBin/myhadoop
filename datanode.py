@@ -6,6 +6,7 @@ import threading
 from app_route import *
 from utilities import *
 from functools import reduce
+from robust_socket_io import *
 
 datanode_id_self = None
 datanodes_address = None
@@ -41,6 +42,7 @@ def datanode_start():
     namenode_port = net_config['namenode_port_in']
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((namenode_ip, namenode_port))
+    rsock = RSockIO(sock)
 
     # start file server thread
     file_server_thread = threading.Thread(target=file_server)
@@ -49,10 +51,10 @@ def datanode_start():
     # send file server port info
     file_server_port = file_server_port_queue.get()
     file_server_port_info = {'type': "FILE_SERVER_PORT", "file_server_port": file_server_port}
-    send_json_check_echo(sock, file_server_port_info)
+    send_json(rsock, file_server_port_info)
 
     # get datanodes address information
-    datanodes_ad_info = get_json_echo(sock)
+    datanodes_ad_info = get_json(rsock)
     if datanodes_ad_info['type'] == "DATANODES_AD":
         datanode_id_self = datanodes_ad_info['id_self']
         datanodes_address = datanodes_ad_info['content']
@@ -63,7 +65,7 @@ def datanode_start():
 
     # waiting for jobs
     while True:
-        task_info = get_json_echo(sock)
+        task_info = get_json(rsock)
 
         # if there is a new job
         if task_info['type'] == "NEW_JOB":
@@ -87,13 +89,13 @@ def datanode_start():
             log("FS", "output directory ready for " + job_name)
 
             # call do_the_job
-            do_the_job(sock, job_name, job_input_dir, job_output_dir)
+            do_the_job(rsock, job_name, job_input_dir, job_output_dir)
 
 
-def do_the_job(sock, job_name, input_dir, output_dir):
+def do_the_job(rsock, job_name, input_dir, output_dir):
     """Deal with each job
     
-    :param sock:
+    :param rsock:
     :param job_name: 
     :param input_dir: 
     :param output_dir: 
@@ -108,7 +110,7 @@ def do_the_job(sock, job_name, input_dir, output_dir):
     # receive map tasks
     while True:
         # get task info and send echo
-        task_info = get_json_echo(sock)
+        task_info = get_json(rsock)
 
         # if new task, add to the queue
         task_type = task_info['type']
@@ -131,11 +133,11 @@ def do_the_job(sock, job_name, input_dir, output_dir):
 
         if map_feedback_info['type'] == "MAP_TASK_DONE":
             # send feedback and update map task progress
-            send_json_check_echo(sock, map_feedback_info)
+            send_json(rsock, map_feedback_info)
             map_task_local_tracker[map_task_id] = "FINISH"
         elif map_feedback_info['type'] == 'MAP_PARTITION_INFO':
             # send partition info
-            send_json_check_echo(sock, map_feedback_info)
+            send_json(rsock, map_feedback_info)
 
         # TODO may send feedback information (partial information) before the task is done
 
@@ -155,11 +157,11 @@ def do_the_job(sock, job_name, input_dir, output_dir):
 
             # send all-done info and break while loop
             map_datanode_done_info = {'type': "MAP_DATANODE_DONE", "datanode_id": datanode_id_self}
-            send_json(sock, map_datanode_done_info)
+            send_json(rsock, map_datanode_done_info)
             break
 
     # receive shuffle and reduce task
-    shuffle_and_reduce_task_info = get_json_echo(sock)
+    shuffle_and_reduce_task_info = get_json(rsock)
     task_type = shuffle_and_reduce_task_info['type']
     if task_type == 'SHUFFLE_AND_REDUCE':
         shuffle_task_list = shuffle_and_reduce_task_info['shuffle_tasks']
@@ -209,23 +211,24 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     file_client_sock.connect((target_datanode_ip, file_server_port))
+    file_client_rsock = RSockIO(file_client_sock)
     # make directory for storing map result from datanode
     local_dir_datanode = os.path.join(map_merged_dir, str(target_datanode_id))
     check_and_make_directory(local_dir_datanode)
 
     for target_partition_id in shuffle_task_list:
         file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id}
-        send_json(file_client_sock, file_request_info)
+        send_json(file_client_rsock, file_request_info)
 
         # get file size info
-        file_size_info = get_json_echo(file_client_sock)
+        file_size_info = get_json(file_client_rsock)
         if file_size_info['type'] == "FILE_SIZE":
             file_size = file_size_info['file_size']
             target_file_path = os.path.join(local_dir_datanode, str(target_partition_id))
-            get_file(file_client_sock, target_file_path, file_size)
+            get_file(file_client_rsock, target_file_path, file_size)
 
     file_request_over_info = {'type': "FILE_REQUEST_OVER"}
-    send_json(file_client_sock, file_request_over_info)
+    send_json(file_client_rsock, file_request_over_info)
     file_client_sock.close()
 
 
@@ -244,20 +247,21 @@ def file_server():
     file_server_sock.listen()
     while True:
         sock, addr = file_server_sock.accept()
-        serve_file_thread = threading.Thread(target=thread_serve_file, args=(sock,))
+        rsock = RSockIO(sock)
+        serve_file_thread = threading.Thread(target=thread_serve_file, args=(rsock,))
         serve_file_thread.start()
 
 
-def thread_serve_file(sock):
+def thread_serve_file(rsock):
     """Thread serving files through socket
     
-    :param sock: 
+    :param rsock: 
     :return: 
     
     """
     global map_merged_dir
     while True:
-        file_request_info = get_json(sock)
+        file_request_info = get_json(rsock)
         request_type = file_request_info['type']
         if request_type == "FILE_REQUEST":
             target_partition_id = file_request_info['partition_id']
@@ -265,11 +269,11 @@ def thread_serve_file(sock):
 
             # send file size information
             file_size_info = {"type": "FILE_SIZE", "file_size": os.stat(target_partition_file_path).st_size}
-            send_json_check_echo(sock, file_size_info)
+            send_json(rsock, file_size_info)
 
-            send_file(sock, target_partition_file_path)
+            send_file(rsock, target_partition_file_path)
         elif request_type == "FILE_REQUEST_OVER":
-            sock.close()
+            rsock.close_sock()
             break
 
 

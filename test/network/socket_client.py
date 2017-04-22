@@ -1,16 +1,18 @@
 import socket
+from robust_socket_io import RSockIO
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-s.connect(("localhost", 8888))
+s.connect(("localhost", 1111))
 
 to_send = {"name": "Jack", "age": 22}
 
+rsIO = RSockIO(s)
 
-s.send(to_send)
+rsIO.sendline(to_send)
 
-response = s.recv(1024)
+response = rsIO.readlineb()[1]
 
 print(response)
 
-s.close()
+rsIO.close_sock()

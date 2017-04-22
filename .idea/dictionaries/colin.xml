@@ -2,11 +2,17 @@
   <dictionary name="colin">
     <words>
       <w>addr</w>
+      <w>bufptr</w>
       <w>groupby</w>
       <w>hdfs</w>
       <w>jobtracker</w>
       <w>mkdir</w>
+      <w>nleft</w>
+      <w>readline</w>
+      <w>readlineb</w>
+      <w>readnb</w>
       <w>recv</w>
+      <w>rsock</w>
       <w>tasktracker</w>
     </words>
   </dictionary>
