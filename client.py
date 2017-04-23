@@ -22,7 +22,7 @@ def client_start():
     send_json(rsock, job_information)
 
     # receive job feedback
-    # when receive status "SUCCESS" or "ERROR", terminate
+    # when receive status "JOB_DONE" or "ERROR", terminate
     while True:
         job_feedback = get_json(rsock)
         if job_feedback['status'] == "ERROR":
@@ -30,7 +30,7 @@ def client_start():
             break
         else:
             log(job_feedback['status'], job_feedback['message'])
-            if job_feedback['status'] == "SUCCESS":
+            if job_feedback['status'] == "JOB_DONE":
                 break
 
     # close socket

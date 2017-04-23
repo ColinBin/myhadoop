@@ -16,9 +16,10 @@ map_merged_self_dir = None
 map_merged_final_dir = None
 reduce_output_datanode_dir = None
 
-map_task_queue = queue.Queue(maxsize=0)         # map task queue
-map_feedback_queue = queue.Queue(maxsize=0)     # feedback from map tasks
-file_server_port_queue = queue.Queue(maxsize=0)
+map_task_queue = queue.Queue(maxsize=0)             # map task queue
+map_feedback_queue = queue.Queue(maxsize=0)         # feedback from map tasks
+shuffle_feedback_queue = queue.Queue(maxsize=0)     # feedback from shuffle tasks
+reduce_feedback_queue = queue.Queue(maxsize=0)      # feedback from reduce tasks
 
 
 def datanode_start():
@@ -44,12 +45,15 @@ def datanode_start():
     sock.connect((namenode_ip, namenode_port))
     rsock = RSockIO(sock)
 
-    # start file server thread
-    file_server_thread = threading.Thread(target=file_server)
+    # start file server thread. Get the port number and send to namenode
+    file_server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    file_server_sock.bind(('0.0.0.0', 0))
+    file_server_port = file_server_sock.getsockname()[1]
+
+    file_server_thread = threading.Thread(target=file_server, args=(file_server_sock, ))
     file_server_thread.start()
 
     # send file server port info
-    file_server_port = file_server_port_queue.get()
     file_server_port_info = {'type': "FILE_SERVER_PORT", "file_server_port": file_server_port}
     send_json(rsock, file_server_port_info)
 
@@ -76,7 +80,7 @@ def datanode_start():
 
             # make temporary directory and reduce output directory for self
             # if directories exist, remove and make
-            local_dir = os.path.join(datanode_dir, str(datanode_id_self))
+            local_dir = os.path.join(datanode_dir, make_datanode_dir_name(datanode_id_self))
             check_and_make_directory(local_dir)
             log("FS", "temporary directory ready for " + job_name)
 
@@ -84,7 +88,7 @@ def datanode_start():
             map_merged_dir = os.path.join(local_dir, "map_merged")
             check_and_make_directory(map_merged_dir)
 
-            reduce_output_datanode_dir = os.path.join(output_dir, str(datanode_id_self))
+            reduce_output_datanode_dir = os.path.join(output_dir, make_datanode_dir_name(datanode_id_self))
             check_and_make_directory(reduce_output_datanode_dir)
             log("FS", "output directory ready for " + job_name)
 
@@ -150,15 +154,15 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
         else:
             # merge map output,
             log("JOB", "map tasks done, start merging files")
-            map_merged_self_dir = os.path.join(map_merged_dir, str(datanode_id_self))
-
-            merge_map_output(local_dir, map_merged_dir, map_merged_self_dir, partition_number)
-            log("JOB", "finish merging map results")
+            map_merged_self_dir = os.path.join(map_merged_dir, make_datanode_dir_name(datanode_id_self))
 
             # send all-done info and break while loop
             map_datanode_done_info = {'type': "MAP_DATANODE_DONE", "datanode_id": datanode_id_self}
             send_json(rsock, map_datanode_done_info)
             break
+
+    merge_map_output(local_dir, map_merged_dir, map_merged_self_dir, partition_number)
+    log("JOB", "finish merging map results")
 
     # receive shuffle and reduce task
     shuffle_and_reduce_task_info = get_json(rsock)
@@ -185,7 +189,10 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
         for shuffle_thread in shuffle_thread_list:
             shuffle_thread.join()
 
+        # shuffle done
         log("JOB", "shuffling done")
+        shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
+        send_json(rsock, shuffle_done_info)
 
         # final merge
         map_merged_final_dir = os.path.join(map_merged_dir, "final")
@@ -198,7 +205,14 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
         reduce_fun = app.reduce
         final_reduce(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, reduce_task_list)
 
+        # final reduce done
         log("JOB", "final reduce done")
+        job_done_info = {'type': "FINAL_REDUCE_DONE", "job_name": job_name, "datanode_id": datanode_id_self}
+        send_json(rsock, job_done_info)
+
+        # job done
+        log("JOB", "job done")
+
 
 
 def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port, shuffle_task_list):
@@ -213,7 +227,7 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     file_client_sock.connect((target_datanode_ip, file_server_port))
     file_client_rsock = RSockIO(file_client_sock)
     # make directory for storing map result from datanode
-    local_dir_datanode = os.path.join(map_merged_dir, str(target_datanode_id))
+    local_dir_datanode = os.path.join(map_merged_dir, make_datanode_dir_name(target_datanode_id))
     check_and_make_directory(local_dir_datanode)
 
     for target_partition_id in shuffle_task_list:
@@ -224,7 +238,7 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
         file_size_info = get_json(file_client_rsock)
         if file_size_info['type'] == "FILE_SIZE":
             file_size = file_size_info['file_size']
-            target_file_path = os.path.join(local_dir_datanode, str(target_partition_id))
+            target_file_path = os.path.join(local_dir_datanode, make_partition_dir_name(target_partition_id))
             get_file(file_client_rsock, target_file_path, file_size)
 
     file_request_over_info = {'type': "FILE_REQUEST_OVER"}
@@ -232,18 +246,12 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     file_client_sock.close()
 
 
-def file_server():
+def file_server(file_server_sock):
     """File server for shuffle
     
     :return:
      
     """
-    file_server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    file_server_sock.bind(('0.0.0.0', 0))
-    file_server_port = file_server_sock.getsockname()[1]
-
-    # notify about the port
-    file_server_port_queue.put(file_server_port)
     file_server_sock.listen()
     while True:
         sock, addr = file_server_sock.accept()
@@ -265,7 +273,7 @@ def thread_serve_file(rsock):
         request_type = file_request_info['type']
         if request_type == "FILE_REQUEST":
             target_partition_id = file_request_info['partition_id']
-            target_partition_file_path = os.path.join(map_merged_self_dir, str(target_partition_id))
+            target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
 
             # send file size information
             file_size_info = {"type": "FILE_SIZE", "file_size": os.stat(target_partition_file_path).st_size}

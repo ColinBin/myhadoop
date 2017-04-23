@@ -14,7 +14,7 @@ def err_log(err_type, err_message):
     :return: None
     
     """
-    print(err_type + ": " + err_message, file=sys.stderr)
+    print("[" + err_type + "] " + err_message, file=sys.stderr)
 
 
 def log(log_type, log_message):
@@ -25,7 +25,7 @@ def log(log_type, log_message):
     :return: None
     
     """
-    print(log_type + ": " + log_message, flush=True)
+    print("[" + log_type + "] " + log_message, flush=True)
 
 
 def get_json(rsock):
@@ -92,6 +92,14 @@ def check_and_make_directory(dir_path):
     if os.path.exists(dir_path):
         shutil.rmtree(dir_path)
     os.mkdir(dir_path, 0o755)
+
+
+def make_datanode_dir_name(datanode_id):
+    return "datanode_" + str(datanode_id)
+
+
+def make_partition_dir_name(partition_id):
+    return "partition_" + str(partition_id)
 
 
 def check_dir_for_job(job_fs_path):

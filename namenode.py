@@ -11,11 +11,12 @@ datanode_number = general_config['datanode_number']
 job_queue_tracker = queue.Queue(maxsize=0)      # job queue for job tracker
 job_queue_scheduler = queue.Queue(maxsize=0)    # job queue for scheduler
 
-task_queues = None                      # queues of map or reduce tasks for datanodes
+task_queues = None                              # queues of map or reduce tasks for datanodes
 datanodes_feedback_queue = queue.Queue(maxsize=0)   # queue for receiving feedback from datanodes
 client_feedback_queue = queue.Queue(maxsize=0)      # feedback queue for clients
 partition_info_queue = queue.Queue(maxsize=0)       # partition info queue
-datanode_address_keeper = dict()        # relate datanode id with ip and port
+datanode_address_keeper = dict()                    # relate datanode id with ip and port
+
 
 def namenode_start():
     """Entrance function for namenode
@@ -223,7 +224,7 @@ def thread_jobtracker():
     """
     log("JOBTRACKER", "jobtracker started")
 
-    global job_queue_tracker, task_queues, datanodes_feedback_queue, partition_info_queue
+    global job_queue_tracker, task_queues, datanodes_feedback_queue, partition_info_queue, datanode_number
 
     while True:
         # get a new job
@@ -240,13 +241,13 @@ def thread_jobtracker():
         log("JOBTRACKER", "new job started --> " + job_name)
 
         # keep track of datanode progress locally
-        datanode_progress_info = dict()
+        datanode_progress_counter = {"START": 0, "MAP_ASSIGNMENT": 0, "MAP_DONE": 0, "SHUFFLE_DONE": 0, "FINAL_REDUCE_DONE": 0}
 
         # notifying datanodes about new job
         for datanode_id in list(range(datanode_number)):
             job_info = {"type": "NEW_JOB", "job_name": job_name, "input_dir": input_dir, "output_dir": output_dir}
             task_queues[datanode_id].put(job_info)
-            datanode_progress_info[datanode_id] = "START"
+            datanode_progress_counter['START'] += 1
 
         # assign map tasks to datanodes with file information
         current_datanode_id = 0
@@ -259,7 +260,7 @@ def thread_jobtracker():
         for datanode_id in list(range(datanode_number)):
             map_task_assignment_end_info = {"type": "MAP_TASK_ASSIGNMENT_END"}
             task_queues[datanode_id].put(map_task_assignment_end_info)
-            datanode_progress_info[datanode_id] = "MAP_TASK_ASSIGNMENT_END"
+            datanode_progress_counter['MAP_ASSIGNMENT'] += 1
 
         # receive map task feedback information
         while True:
@@ -268,21 +269,34 @@ def thread_jobtracker():
                 task_status = map_feedback_info['status']
                 map_task_id = map_feedback_info['map_task_id']
                 if task_status == "FINISH":
-                    print("map task finished " + map_task_id)
+                    task_done_client_info = {'type': "FEEDBACK", "status": "MAP_TASK_DONE", "message": "map task " + map_task_id + " done"}
+                    client_feedback_queue.put(task_done_client_info)
             elif map_feedback_info['type'] == 'MAP_DATANODE_DONE':
                 datanode_id = map_feedback_info['datanode_id']
-                datanode_progress_info[datanode_id] = "MAP_DATANODE_DONE"
-                for status in datanode_progress_info.values():
-                    if status != "MAP_DATANODE_DONE":
-                        # some datanode has not finished map tasks
-                        break
-                else:
+                datanode_progress_counter['MAP_DONE'] += 1
+                if datanode_progress_counter['MAP_DONE'] == datanode_number:
                     # all map tasks are done, notify scheduler and break
                     map_all_done_scheduler_info = {'type': "MAP_ALL_DONE"}
+                    map_all_done_client_info = {'type': 'FEEDBACK', "status": "MAP_ALL_DONE", "message": "map tasks all done"}
+                    client_feedback_queue.put(map_all_done_client_info)
                     partition_info_queue.put(map_all_done_scheduler_info)
                     break
 
         # wait for shuffle and reduce feedback
+        while True:
+            feedback_info = datanodes_feedback_queue.get()
+            feedback_type = feedback_info['type']
+            if feedback_type == 'SHUFFLE_DONE':
+                datanode_progress_counter['SHUFFLE_DONE'] += 1
+            elif feedback_type == 'FINAL_REDUCE_DONE':
+                datanode_progress_counter['FINAL_REDUCE_DONE'] += 1
+                # if job done on all the nodes, break and wait for a new job
+                if datanode_progress_counter['FINAL_REDUCE_DONE'] == datanode_number:
+                    job_done_client_info = {'type': "FEEDBACK", "status": "JOB_DONE", "message": "job " + job_name + " all done"}
+                    client_feedback_queue.put(job_done_client_info)
+                    break
+
+        log("JOB", "waiting for new job")
 
 
 def thread_datanode_tracker(rsock, addr, id):
@@ -346,6 +360,14 @@ def thread_datanode_tracker(rsock, addr, id):
                 send_json(rsock, shuffle_and_reduce_task_info)
 
             # waiting for shuffle and reduce feedback
+            while True:
+                feedback_info = get_json(rsock)
+                feedback_type = feedback_info['type']
+                if feedback_type == 'SHUFFLE_DONE':
+                    datanodes_feedback_queue.put(feedback_info)
+                elif feedback_type == "FINAL_REDUCE_DONE":
+                    datanodes_feedback_queue.put(feedback_info)
+                    break
 
 
 def thread_client(rsock, addr):
@@ -374,7 +396,7 @@ def thread_client(rsock, addr):
         while True:
             feedback_info = client_feedback_queue.get()
             send_json(rsock, feedback_info)
-            if feedback_info['status'] == "SUCCESS":
+            if feedback_info['status'] == "JOB_DONE":
                 break
 
 if __name__ == "__main__":

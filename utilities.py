@@ -32,7 +32,7 @@ def partition_sorted(partition_sorted_data, map_task_dir):
         partition_info[partition_id] = 0
 
     for partition_id, per_group_data in groupby(partition_sorted_data, key=get_key_for_sort_partition):
-        with open(os.path.join(map_task_dir, str(partition_id)), 'w', encoding='utf-8') as f:
+        with open(os.path.join(map_task_dir, make_partition_dir_name(partition_id)), 'w', encoding='utf-8') as f:
             final_sorted_group_data_list = list(sorted(per_group_data, key=get_key_for_sort_normal))
             partition_info[partition_id] = len(final_sorted_group_data_list)
             f.write(str(final_sorted_group_data_list))
@@ -85,6 +85,68 @@ def merge_partition_info(current_info, new_info):
         current_info[partition_id] = current_info.get(partition_id, 0) + new_info[str(partition_id)]
 
 
+def merge_files(source_file_list, target_file_path, comparator):
+    """Merge files in the list while maintaining the order of the elements
+    
+    :param source_file_list: 
+    :param target_file_path: 
+    :param comparator: 
+    :return: 
+    
+    """
+    # TODO open multiple files at the same time or pull the content out of each file
+    source_file_number = len(source_file_list)      # number of files to be processed
+    file_finished_number = 0                        # number of files currently finished
+    output_content = []                             # output to write
+    source_file_index = dict()
+    for file_id in list(range(source_file_number)):
+        source_file_index[file_id] = 0
+    source_file_length = [0 for file_id in list(range(source_file_number))]
+    source_file_content = [[] for file_id in list(range(source_file_number))]
+    for file_id in list(range(source_file_number)):
+        with open(source_file_list[file_id], 'r', encoding='utf-8') as f:
+            current_file_content = eval(f.read())
+            source_file_length[file_id] = len(current_file_content)
+            source_file_content[file_id] = current_file_content
+
+    current_candidates = [(file_id, source_file_content[file_id][0]) for file_id in list(range(source_file_number))]
+    while file_finished_number < source_file_number:
+        minimal_file_index, content = find_minimal(current_candidates, comparator)
+        output_content.append(content)
+
+
+    # write final output
+    with open(target_file_path, 'w', encoding='utf-8') as f:
+        f.write(str(output_content))
+
+def find_minimal(candidates, comparator):
+    candidate_id = 0
+    content = candidates[candidate_id]
+    for candidate in candidates:
+        if comparator(candidate[1], content) < 0:
+            candidate_id = candidate[0]
+            content = candidate[1]
+    return candidate_id, content
+
+
+def merge_and_sort(source_file_list, target_file_path):
+    """Merge source files in the list, sort the combined content and write to the target file path
+    
+    :param source_file_list: 
+    :param target_file_path: 
+    :return: 
+    """
+    content = []
+    file_number = len(source_file_list)
+    for file_id in list(range(file_number)):
+        with open(source_file_list[file_id], 'r', encoding='utf-8') as f:
+            content_list = eval(f.read())
+            content = content + content_list
+    sorted_content = sorted(content, key=get_key_for_sort_normal)
+    with open(target_file_path, 'w', encoding='utf-8') as f:
+        f.write(str(sorted_content))
+
+
 def merge_map_output(local_dir, map_merged_dir, target_dir, partition_number):
     """Merge map tasks output and put in target directory
     
@@ -103,21 +165,9 @@ def merge_map_output(local_dir, map_merged_dir, target_dir, partition_number):
 
     for partition_id in list(range(partition_number)):
         # merge for each partition
-        current_target_file = os.path.join(target_dir, str(partition_id))
-
-        # TODO write specialized merge function to merge files
-        # get and sort is less efficient
-        # get content from all tasks and sort
-        content_current_partition = []
-        for map_task_dir in map_task_dirs:
-            map_task_partition_file = os.path.join(map_task_dir, str(partition_id))
-            with open(map_task_partition_file, 'r', encoding='utf-8') as f:
-                content_list = eval(f.read())
-                content_current_partition += content_list
-
-        sorted_content = sorted(content_current_partition, key=get_key_for_sort_normal)
-        with open(current_target_file, 'w', encoding='utf-8') as f:
-            f.write(str(sorted_content))
+        current_target_file = os.path.join(target_dir, make_partition_dir_name(partition_id))
+        source_file_list = [os.path.join(map_task_dir, make_partition_dir_name(partition_id)) for map_task_dir in map_task_dirs]
+        merge_and_sort(source_file_list, current_target_file)
 
 
 def merge_map_output_final(source_dir, target_dir, reduce_task_list, datanode_number):
@@ -130,17 +180,9 @@ def merge_map_output_final(source_dir, target_dir, reduce_task_list, datanode_nu
      
     """
     for current_partition_id in reduce_task_list:
-        target_file_path = os.path.join(target_dir, str(current_partition_id))
-
-        current_content_partition = []
-        for datanode_id in list(range(datanode_number)):
-            current_file_path = os.path.join(source_dir, str(datanode_id), str(current_partition_id))
-            with open(current_file_path, 'r', encoding='utf-8') as f:
-                content_list = eval(f.read())
-                current_content_partition += content_list
-        sorted_content = sorted(current_content_partition, key=get_key_for_sort_normal)
-        with open(target_file_path, 'w', encoding='utf-8') as f:
-            f.write(str(sorted_content))
+        target_file_path = os.path.join(target_dir, make_partition_dir_name(current_partition_id))
+        source_file_list = [os.path.join(source_dir, make_datanode_dir_name(datanode_id), make_partition_dir_name(current_partition_id)) for datanode_id in list(range(datanode_number))]
+        merge_and_sort(source_file_list, target_file_path)
 
 
 def final_reduce(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, reduce_task_list):
@@ -154,9 +196,9 @@ def final_reduce(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, r
     
     """
     for target_partition_id in reduce_task_list:
-        target_file_path = os.path.join(reduce_output_datanode_dir, str(target_partition_id))
+        target_file_path = os.path.join(reduce_output_datanode_dir, make_partition_dir_name(target_partition_id))
 
-        merged_file = os.path.join(map_merged_final_dir, str(target_partition_id))
+        merged_file = os.path.join(map_merged_final_dir, make_partition_dir_name(target_partition_id))
         reduce_result = []
         with open(merged_file, 'r', encoding='utf-8') as f:
             file_content_list = eval(f.read())
