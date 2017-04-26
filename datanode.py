@@ -164,6 +164,9 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
     merge_map_output(local_dir, map_merged_dir, map_merged_self_dir, partition_number)
     log("JOB", "finish merging map results")
 
+    local_merge_done_info = {'type': "LOCAL_MAP_MERGE_DONE", "datanode_id": datanode_id_self}
+    send_json(rsock, local_merge_done_info)
+
     # receive shuffle and reduce task
     shuffle_and_reduce_task_info = get_json(rsock)
     task_type = shuffle_and_reduce_task_info['type']
@@ -279,8 +282,10 @@ def thread_serve_file(rsock):
             file_size_info = {"type": "FILE_SIZE", "file_size": os.stat(target_partition_file_path).st_size}
             send_json(rsock, file_size_info)
 
+            # send file
             send_file(rsock, target_partition_file_path)
         elif request_type == "FILE_REQUEST_OVER":
+            # if no more requests, end
             rsock.close_sock()
             break
 

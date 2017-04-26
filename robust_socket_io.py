@@ -53,7 +53,7 @@ class RSockIO(object):
 
     def __read(self, n):
         """Read n bytes from buffer, manipulate the buffer directly.
-        If the buffer, read from the socket first
+        If the buffer is empty, read from the socket first
         
         :param n: 
         :return: bytes_count, content_read

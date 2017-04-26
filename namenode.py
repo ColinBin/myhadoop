@@ -115,7 +115,19 @@ def thread_scheduler():
                 break
         # print(partition_info_tracker)
         # schedule based on partition info
-        schedule(partition_info_tracker)
+        reduce_task_lists, shuffle_task_lists = schedule(partition_info_tracker)
+
+        # when local merge is done on every datanode, send shuffle and reduce instructions
+        local_map_merge_info = partition_info_queue.get()
+        if local_map_merge_info['type'] == "LOCAL_MAP_MERGE_DONE":
+            for datanode_id in list(range(datanode_number)):
+                reduce_tasks_datanode = reduce_task_lists[datanode_id]
+                shuffle_tasks_datanode = shuffle_task_lists[datanode_id]
+
+                # send to the task queues
+                shuffle_and_reduce_task_info = {"type": "SHUFFLE_AND_REDUCE", "reduce_tasks": reduce_tasks_datanode,
+                                                "shuffle_tasks": shuffle_tasks_datanode}
+                task_queues[datanode_id].put(shuffle_and_reduce_task_info)
 
 
 def schedule(partition_info_tracker):
@@ -205,14 +217,7 @@ def schedule(partition_info_tracker):
             else:
                 shuffle_task_lists[datanode_id].append(partition_id)
 
-    for datanode_id in list(range(datanode_number)):
-        reduce_tasks_datanode = reduce_task_lists[datanode_id]
-        shuffle_tasks_datanode = shuffle_task_lists[datanode_id]
-
-        # send to the task queues
-        shuffle_and_reduce_task_info = {"type": "SHUFFLE_AND_REDUCE", "reduce_tasks": reduce_tasks_datanode, "shuffle_tasks": shuffle_tasks_datanode}
-        task_queues[datanode_id].put(shuffle_and_reduce_task_info)
-
+    return reduce_task_lists, shuffle_task_lists
     # print(reduce_decisions)
 
 
@@ -241,7 +246,7 @@ def thread_jobtracker():
         log("JOBTRACKER", "new job started --> " + job_name)
 
         # keep track of datanode progress locally
-        datanode_progress_counter = {"START": 0, "MAP_ASSIGNMENT": 0, "MAP_DONE": 0, "SHUFFLE_DONE": 0, "FINAL_REDUCE_DONE": 0}
+        datanode_progress_counter = {"START": 0, "MAP_ASSIGNMENT": 0, "MAP_DONE": 0, "LOCAL_MAP_MERGE_DONE": 0, "SHUFFLE_DONE": 0, "FINAL_REDUCE_DONE": 0}
 
         # notifying datanodes about new job
         for datanode_id in list(range(datanode_number)):
@@ -275,11 +280,20 @@ def thread_jobtracker():
                 datanode_id = map_feedback_info['datanode_id']
                 datanode_progress_counter['MAP_DONE'] += 1
                 if datanode_progress_counter['MAP_DONE'] == datanode_number:
-                    # all map tasks are done, notify scheduler and break
+                    # all map tasks are done, notify scheduler, the scheduler will start to schedule
                     map_all_done_scheduler_info = {'type': "MAP_ALL_DONE"}
+                    partition_info_queue.put(map_all_done_scheduler_info)
+
+                    # notify the client
                     map_all_done_client_info = {'type': 'FEEDBACK', "status": "MAP_ALL_DONE", "message": "map tasks all done"}
                     client_feedback_queue.put(map_all_done_client_info)
-                    partition_info_queue.put(map_all_done_scheduler_info)
+            elif map_feedback_info['type'] == "LOCAL_MAP_MERGE_DONE":
+                datanode_id = map_feedback_info['datanode_id']
+                datanode_progress_counter['LOCAL_MAP_MERGE_DONE'] += 1
+                if datanode_progress_counter['LOCAL_MAP_MERGE_DONE'] == datanode_number:
+                    # local map merge done on all datanodes, notify scheduler to send shuffle and reduce tasks. Break
+                    local_map_merge_all_done_info = {'type': "LOCAL_MAP_MERGE_DONE"}
+                    partition_info_queue.put(local_map_merge_all_done_info)
                     break
 
         # wait for shuffle and reduce feedback
@@ -349,7 +363,10 @@ def thread_datanode_tracker(rsock, addr, id):
                     # for map partition info, add to partition info queue
                     partition_info_queue.put(map_feedback_info)
                 elif feedback_type == "MAP_DATANODE_DONE":
-                    # if assigned map tasks all done, break
+                    # if assigned map tasks all done
+                    datanodes_feedback_queue.put(map_feedback_info)
+                elif feedback_type == "LOCAL_MAP_MERGE_DONE":
+                    # if local map merge done on all datanodes
                     datanodes_feedback_queue.put(map_feedback_info)
                     break
 
