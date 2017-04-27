@@ -76,6 +76,7 @@ def datanode_start():
             job_name = task_info['job_name']
             job_input_dir = task_info['input_dir']
             job_output_dir = task_info['output_dir']
+            job_schedule_plan = task_info['schedule_plan']
             log("JOB", "job started --> " + job_name)
 
             # make temporary directory and reduce output directory for self
@@ -93,16 +94,17 @@ def datanode_start():
             log("FS", "output directory ready for " + job_name)
 
             # call do_the_job
-            do_the_job(rsock, job_name, job_input_dir, job_output_dir)
+            do_the_job(rsock, job_name, job_input_dir, job_output_dir, job_schedule_plan)
 
 
-def do_the_job(rsock, job_name, input_dir, output_dir):
+def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
     """Deal with each job
     
     :param rsock:
     :param job_name: 
     :param input_dir: 
     :param output_dir: 
+    :param job_schedule_plan
     :return: 
     
     """
@@ -174,28 +176,59 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
         shuffle_task_list = shuffle_and_reduce_task_info['shuffle_tasks']
         reduce_task_list = shuffle_and_reduce_task_info['reduce_tasks']
 
-        # shuffle thread list
-        shuffle_thread_list = []
+        # final reduce
+        app = app_route_info[job_name]()
+        reduce_fun = app.reduce
 
-        # create socket with each datanode other than self
-        for datanode_id, addr_info in datanodes_address.items():
-            if int(datanode_id) != datanode_id_self:
-                # start shuffle task fetching files from each datanode
-                target_datanode_ip = addr_info['ip']
-                target_datanode_file_server_port = addr_info['file_server_port']
-                # get file in the reduce list for current datanode
-                shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, reduce_task_list))
-                shuffle_thread_list.append(shuffle_thread)
+        # apply different strategies based on schedule plan
+        if job_schedule_plan == "HADOOP":
+            # shuffle
+            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list)
+            for shuffle_thread in shuffle_thread_list:
+                shuffle_thread.start()
+            for shuffle_thread in shuffle_thread_list:
+                shuffle_thread.join()
+            # send shuffle done
+            log("JOB", "shuffling done")
+            shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
+            send_json(rsock, shuffle_done_info)
 
-        for shuffle_thread in shuffle_thread_list:
-            shuffle_thread.start()
-        for shuffle_thread in shuffle_thread_list:
-            shuffle_thread.join()
+        elif job_schedule_plan == "ICPP":
+            # local reduce
+            local_reduce_thread = do_local_reduce(shuffle_task_list, map_merged_self_dir, reduce_fun)
+            local_reduce_thread.start()
+            local_reduce_thread.join()
 
-        # shuffle done
-        log("JOB", "shuffling done")
-        shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
-        send_json(rsock, shuffle_done_info)
+            # shuffle
+            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list)
+            for shuffle_thread in shuffle_thread_list:
+                shuffle_thread.start()
+            for shuffle_thread in shuffle_thread_list:
+                shuffle_thread.join()
+
+            # send shuffle done
+            log("JOB", "shuffling done")
+            shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
+            send_json(rsock, shuffle_done_info)
+
+        elif job_schedule_plan == "NEW":
+            awaiting_thread_list = []
+            local_reduce_thread = do_local_reduce(shuffle_task_list, map_merged_self_dir, reduce_fun)
+            awaiting_thread_list.append(local_reduce_thread)
+
+            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list)
+            awaiting_thread_list = awaiting_thread_list + shuffle_thread_list
+
+            # overlapping thread logic
+            for awaiting_thread in awaiting_thread_list:
+                awaiting_thread.start()
+            for awaiting_thread in awaiting_thread_list:
+                awaiting_thread.join()
+
+            # send shuffle done
+            log("JOB", "shuffling done")
+            shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
+            send_json(rsock, shuffle_done_info)
 
         # final merge
         map_merged_final_dir = os.path.join(map_merged_dir, "final")
@@ -203,10 +236,8 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
         merge_map_output_final(map_merged_dir, map_merged_final_dir, reduce_task_list, len(datanodes_address))
         log("JOB", "final merge done")
 
-        # final reduce
-        app = app_route_info[job_name]()
-        reduce_fun = app.reduce
-        final_reduce(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, reduce_task_list)
+        for partition_id in reduce_task_list:
+            final_reduce_partition(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, partition_id)
 
         # final reduce done
         log("JOB", "final reduce done")
@@ -216,6 +247,41 @@ def do_the_job(rsock, job_name, input_dir, output_dir):
         # job done
         log("JOB", "job done")
 
+
+def do_shuffle(datanodes_address, datanode_id_self, reduce_task_list):
+    """Return shuffle thread list (not started)
+    
+    :param datanodes_address: 
+    :param datanode_id_self: 
+    :param reduce_task_list: 
+    :return: 
+    """
+    # shuffle thread list
+    shuffle_thread_list = []
+
+    # create socket with each datanode other than self
+    for datanode_id, addr_info in datanodes_address.items():
+        if int(datanode_id) != datanode_id_self:
+            # start shuffle task fetching files from each datanode
+            target_datanode_ip = addr_info['ip']
+            target_datanode_file_server_port = addr_info['file_server_port']
+            # get file in the reduce list for current datanode
+            shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, reduce_task_list))
+            shuffle_thread_list.append(shuffle_thread)
+
+    return shuffle_thread_list
+
+
+def do_local_reduce(shuffle_task_list, map_merged_self_dir, reduce_fun):
+    """Return the thread for local reduce (not started)
+    
+    :param shuffle_task_list: 
+    :param map_merged_self_dir: 
+    :param reduce_fun: 
+    :return: 
+    """
+    local_reduce_thread = threading.Thread(target=thread_local_reduce, args=(shuffle_task_list, map_merged_self_dir, reduce_fun))
+    return local_reduce_thread
 
 
 def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port, shuffle_task_list):
@@ -247,6 +313,20 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     file_request_over_info = {'type': "FILE_REQUEST_OVER"}
     send_json(file_client_rsock, file_request_over_info)
     file_client_sock.close()
+
+
+def thread_local_reduce(shuffle_task_list, map_merged_self_dir, reduce_fun):
+    """Thread working on local reduce
+    
+    :param shuffle_task_list: 
+    :param map_merged_self_dir: 
+    :param reduce_fun: 
+    :return: 
+    """
+    for target_partition_id in shuffle_task_list:
+        source_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+        # overwrite source file with reduced file
+        reduce_file(source_file_path, source_file_path, reduce_fun)
 
 
 def file_server(file_server_sock):

@@ -85,50 +85,6 @@ def merge_partition_info(current_info, new_info):
         current_info[partition_id] = current_info.get(partition_id, 0) + new_info[str(partition_id)]
 
 
-def merge_files(source_file_list, target_file_path, comparator):
-    """Merge files in the list while maintaining the order of the elements
-    
-    :param source_file_list: 
-    :param target_file_path: 
-    :param comparator: 
-    :return: 
-    
-    """
-    # TODO open multiple files at the same time or pull the content out of each file
-    source_file_number = len(source_file_list)      # number of files to be processed
-    file_finished_number = 0                        # number of files currently finished
-    output_content = []                             # output to write
-    source_file_index = dict()
-    for file_id in list(range(source_file_number)):
-        source_file_index[file_id] = 0
-    source_file_length = [0 for file_id in list(range(source_file_number))]
-    source_file_content = [[] for file_id in list(range(source_file_number))]
-    for file_id in list(range(source_file_number)):
-        with open(source_file_list[file_id], 'r', encoding='utf-8') as f:
-            current_file_content = eval(f.read())
-            source_file_length[file_id] = len(current_file_content)
-            source_file_content[file_id] = current_file_content
-
-    current_candidates = [(file_id, source_file_content[file_id][0]) for file_id in list(range(source_file_number))]
-    while file_finished_number < source_file_number:
-        minimal_file_index, content = find_minimal(current_candidates, comparator)
-        output_content.append(content)
-
-
-    # write final output
-    with open(target_file_path, 'w', encoding='utf-8') as f:
-        f.write(str(output_content))
-
-def find_minimal(candidates, comparator):
-    candidate_id = 0
-    content = candidates[candidate_id]
-    for candidate in candidates:
-        if comparator(candidate[1], content) < 0:
-            candidate_id = candidate[0]
-            content = candidate[1]
-    return candidate_id, content
-
-
 def merge_and_sort(source_file_list, target_file_path):
     """Merge source files in the list, sort the combined content and write to the target file path
     
@@ -185,24 +141,36 @@ def merge_map_output_final(source_dir, target_dir, reduce_task_list, datanode_nu
         merge_and_sort(source_file_list, target_file_path)
 
 
-def final_reduce(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, reduce_task_list):
+def final_reduce_partition(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, partition_id):
     """Final reduce using final merged files, write to reduce output dir
     
     :param map_merged_final_dir: 
     :param reduce_output_datanode_dir: 
     :param reduce_fun: 
-    :param reduce_task_list
+    :param partition_id
     :return: 
     
     """
-    for target_partition_id in reduce_task_list:
-        target_file_path = os.path.join(reduce_output_datanode_dir, make_partition_dir_name(target_partition_id))
 
-        merged_file = os.path.join(map_merged_final_dir, make_partition_dir_name(target_partition_id))
-        reduce_result = []
-        with open(merged_file, 'r', encoding='utf-8') as f:
-            file_content_list = eval(f.read())
-        for key, group in groupby(file_content_list, key=get_key_for_sort_normal):
-            reduce_result.append(reduce(reduce_fun, list(group)))
-        with open(target_file_path, 'w', encoding='utf-8') as f:
-            f.write(str(reduce_result))
+    target_file_path = os.path.join(reduce_output_datanode_dir, make_partition_dir_name(partition_id))
+    merged_file = os.path.join(map_merged_final_dir, make_partition_dir_name(partition_id))
+
+    reduce_file(merged_file, target_file_path, reduce_fun)
+
+
+def reduce_file(source_file_path, target_file_path, reduce_fun):
+    """Doing the actual reduce work on each file
+    
+    :param source_file_path: 
+    :param target_file_path: 
+    :param reduce_fun: 
+    :return: 
+    
+    """
+    with open(source_file_path, 'r', encoding='utf-8') as f:
+        file_content_list = eval(f.read())
+    reduce_result = []
+    for key, group in groupby(file_content_list, key=get_key_for_sort_normal):
+        reduce_result.append(reduce(reduce_fun, list(group)))
+    with open(target_file_path, 'w', encoding='utf-8') as f:
+        f.write(str(reduce_result))

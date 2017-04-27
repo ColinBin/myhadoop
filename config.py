@@ -1,7 +1,7 @@
 # general config
 general_config = {
     "mode": "local",
-    "datanode_number": 3,
+    "datanode_number": 2,
 }
 
 

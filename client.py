@@ -18,7 +18,7 @@ def client_start():
     rsock = RSockIO(sock)
 
     # send job information
-    job_information = {"type": "NEW_JOB", "job_name": "WordCount", "job_fs_path": "wordcount"}
+    job_information = {"type": "NEW_JOB", "job_name": "WordCount", "job_fs_path": "wordcount", "schedule_plan": "ICPP"}
     send_json(rsock, job_information)
 
     # receive job feedback
