@@ -1,7 +1,7 @@
 # general config
 general_config = {
     "mode": "local",
-    "datanode_number": 2,
+    "datanode_number": 4,
 }
 
 
@@ -22,5 +22,5 @@ fs_config = {
 
 # task config
 task_config = {
-    "partition_number": 10,
+    "partition_number": 15,
 }

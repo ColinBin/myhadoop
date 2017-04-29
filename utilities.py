@@ -136,9 +136,28 @@ def merge_map_output_final(source_dir, target_dir, reduce_task_list, datanode_nu
      
     """
     for current_partition_id in reduce_task_list:
-        target_file_path = os.path.join(target_dir, make_partition_dir_name(current_partition_id))
-        source_file_list = [os.path.join(source_dir, make_datanode_dir_name(datanode_id), make_partition_dir_name(current_partition_id)) for datanode_id in list(range(datanode_number))]
-        merge_and_sort(source_file_list, target_file_path)
+        merge_map_output_final_partition(source_dir, target_dir, current_partition_id, datanode_number)
+
+
+def merge_map_output_final_partition(source_dir, target_dir, partition_id, datanode_number):
+    """Merge all map results for one partition 
+    
+    :param source_dir: 
+    :param target_dir: 
+    :param partition_id: 
+    :param datanode_number: 
+    :return: 
+    """
+    target_file_path = os.path.join(target_dir, make_partition_dir_name(partition_id))
+    source_file_list = []
+    # check for local reduce file
+    for datanode_id in list(range(datanode_number)):
+        if os.path.exists(os.path.join(source_dir, make_datanode_dir_name(datanode_id), make_partition_dir_name(partition_id) + "_lr")):
+            source_file_path = os.path.join(source_dir, make_datanode_dir_name(datanode_id), make_partition_dir_name(partition_id) + "_lr")
+        else:
+            source_file_path = os.path.join(source_dir, make_datanode_dir_name(datanode_id), make_partition_dir_name(partition_id))
+        source_file_list.append(source_file_path)
+    merge_and_sort(source_file_list, target_file_path)
 
 
 def final_reduce_partition(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, partition_id):

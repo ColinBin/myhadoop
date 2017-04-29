@@ -2,7 +2,7 @@ import json
 import queue
 from itertools import groupby
 import os
-
+import time
 class App(object):
 
     def map(self):
@@ -79,6 +79,24 @@ print(stat_info.st_size)
 
 print(isinstance(b"faf", bytes))
 
-a = [1,2,3,4,5]
+a = [3]
 a.remove(3)
-print(a)
+if a:
+    print("dfahjfksafja")
+
+print((1,2,3) == (1,2,3))
+
+from collections import deque
+task_list = [1, 4, 3, 6]
+td = deque(task_list)
+print(td.popleft())
+if td:
+    print("Yes")
+print(td.pop())
+print(td.pop())
+print(td.popleft())
+if td:
+    print("Yes")
+
+print(time.time())
+

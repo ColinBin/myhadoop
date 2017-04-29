@@ -162,7 +162,7 @@ def schedule_hadoop(partition_info_tracker, datanode_number, task_queues):
     return reduce_task_lists, shuffle_task_lists
 
 
-def schedule_icpp(partition_info_tracker, datanode_number,task_queues):
+def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
     """Algorithm previously proposed
     
     :param partition_info_tracker: 
@@ -214,7 +214,6 @@ def schedule_icpp(partition_info_tracker, datanode_number,task_queues):
         sum(partition_info_tracker[datanode_id].values()) for datanode_id in list(range(datanode_number)))
     average_workload = total_workload / datanode_number
 
-    # TODO use heap to manage
     # previous solution
     reduce_decisions = dict()  # partition_id : namenode_id
     datanode_load = dict()  # datanode_id : workload
@@ -286,6 +285,9 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
     combined_locality = [[0 for partition_id in list(range(partition_number))] for datanode_id in
                          list(range(datanode_number))]
 
+    # list of locality of each partition when assigned
+    partition_locality = []
+
     # calculate internal locality
     for datanode_id in list(range(datanode_number)):
         partition_info = partition_info_tracker[datanode_id]
@@ -306,12 +308,6 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
         for partition_id in list(range(partition_number)):
             combined_locality[datanode_id][partition_id] = get_combined_locality(internal_locality[datanode_id][partition_id], node_locality[datanode_id][partition_id])
 
-    # calculate average load
-    total_workload = sum(
-        sum(partition_info_tracker[datanode_id].values()) for datanode_id in list(range(datanode_number)))
-    average_workload = total_workload / datanode_number
-
-    # TODO use heap to manage
     # previous solution
     reduce_decisions = dict()  # partition_id : namenode_id
     datanode_load = dict()  # datanode_id : workload
@@ -337,6 +333,7 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
         # all partition assigned
         if current_partition_id == -1:
             break
+
         for partition_id in list(range(partition_number)):
             if datanode_locality_info[partition_id] > datanode_locality_info[current_partition_id]:
                 if partition_id not in reduce_decisions.keys():
@@ -345,15 +342,19 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
         datanode_load[current_datanode_id] = datanode_load[current_datanode_id] + sum(
             partition_info_tracker[datanode_id][current_partition_id] for datanode_id in list(range(datanode_number)))
 
+        # update partition locality
+        partition_locality.append((current_partition_id, datanode_locality_info[current_partition_id]))
+
+    partition_rank = [data[0] for data in sorted(partition_locality, key=lambda x: x[1], reverse=True)]
+
     # assign reduce and shuffle tasks
-    for partition_id in list(range(partition_number)):
+    for partition_id in partition_rank:
         target_datanode_id = reduce_decisions[partition_id]
         for datanode_id in list(range(datanode_number)):
             if datanode_id == target_datanode_id:
                 reduce_task_lists[datanode_id].append(partition_id)
             else:
                 shuffle_task_lists[datanode_id].append(partition_id)
-
     return reduce_task_lists, shuffle_task_lists
 
 
@@ -372,7 +373,7 @@ def schedule(partition_info_tracker, schedule_plan):
     elif schedule_plan == "ICPP":
         return schedule_icpp(partition_info_tracker, datanode_number, task_queues)
     elif schedule_plan == "NEW":
-        return schedule_icpp(partition_info_tracker, datanode_number, task_queues)
+        return schedule_new(partition_info_tracker, datanode_number, task_queues)
 
 
 def thread_jobtracker():
