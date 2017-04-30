@@ -321,6 +321,7 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             # reverse the reduce task list
             shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, job_schedule_plan)
             awaiting_thread_list = awaiting_thread_list + shuffle_thread_list
+            print(str(reduce_task_list) + "+++++++++++")
 
             # overlapping thread logic
             for awaiting_thread in awaiting_thread_list:
@@ -363,7 +364,7 @@ def do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, schedule_p
             target_datanode_ip = addr_info['ip']
             target_datanode_file_server_port = addr_info['file_server_port']
             # get file in the reduce list for current datanode
-            shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, reduce_task_list, schedule_plan))
+            shuffle_thread = threading.Thread(target=thread_shuffle_task, args=(datanode_id, target_datanode_ip, target_datanode_file_server_port, reduce_task_list, schedule_plan, ))
             shuffle_thread_list.append(shuffle_thread)
 
     return shuffle_thread_list
@@ -387,20 +388,23 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     :return: 
     
     """
-    global map_merged_dir, datanodes_address, datanode_id_self, datanode_number, final_reduce_queue
-    file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    global map_merged_dir, datanodes_address, datanode_id_self, datanode_number, final_reduce_queue, shuffle_in_progress_lock, shuffle_in_progress_tracker, final_reduce_list_lock, final_reduce_list_tracker
 
+    file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     file_client_sock.connect((target_datanode_ip, file_server_port))
     file_client_rsock = RSockIO(file_client_sock)
+
     # make directory for storing map result from datanode
     local_dir_datanode = os.path.join(map_merged_dir, make_datanode_dir_name(target_datanode_id))
     check_and_make_directory(local_dir_datanode)
+
+    print("Requesting file in " + str(shuffle_task_list) + " from datanode " + str(target_datanode_id))
     for target_partition_id in shuffle_task_list:
-        print("Requesting file " + str(target_partition_id) + " ")
+        print("Requesting file " + str(target_partition_id) + " from datanode " + str(target_datanode_id))
 
         file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id, "datanode_id": datanode_id_self}
         send_json(file_client_rsock, file_request_info)
-
+        print(file_request_info)
         # get file size info
         file_size_info = get_json(file_client_rsock)
         if file_size_info['type'] == "FILE_SIZE":
@@ -412,8 +416,11 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
                 # check whether partition ready for final reduce
                 shuffle_in_progress_lock.acquire()
                 shuffle_in_progress_tracker[target_partition_id] += 1
+                current_shuffled_in_number = shuffle_in_progress_tracker[target_partition_id]
+                shuffle_in_progress_lock.release()
                 # data for this partition have been all received from other datanode
-                if shuffle_in_progress_tracker[target_partition_id] == datanode_number - 1:
+                if current_shuffled_in_number == datanode_number - 1:
+
                     final_reduce_info = {'type': "FINAL_REDUCE_PARTITION", 'partition_id': target_partition_id}
                     final_reduce_queue.put(final_reduce_info)
 
@@ -421,9 +428,9 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
                     final_reduce_list_lock.acquire()
                     final_reduce_list_tracker.append(target_partition_id)
                     final_reduce_list_lock.release()
-                shuffle_in_progress_lock.release()
 
-        print("received partition " + str(target_partition_id) + " " )
+            print("received partition " + str(target_partition_id) + " " )
+    print("File request over to datanode " + str(target_datanode_id))
     file_request_over_info = {'type': "FILE_REQUEST_OVER", "datanode_id": datanode_id_self}
     send_json(file_client_rsock, file_request_over_info)
     file_client_sock.close()
