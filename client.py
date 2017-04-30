@@ -4,7 +4,7 @@ from tools import *
 from robust_socket_io import *
 from sys import argv
 
-default_plan = "NEW"
+default_plan = "HADOOP"
 
 
 def client_start(schedule_plan):

@@ -2,8 +2,38 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/09d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/12d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/13d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/14d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/22d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/23c_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/23f_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/24d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/25d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/26c_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/26d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/27d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/28c_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/28d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/29d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/30d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/31c_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/31d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/31f_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/33f_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/35d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/37d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/38d_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/39f_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/46g_split" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/67g_split" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client.py" afterPath="$PROJECT_DIR$/client.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.py" afterPath="$PROJECT_DIR$/config.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/datanode.py" afterPath="$PROJECT_DIR$/datanode.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/namenode.py" afterPath="$PROJECT_DIR$/namenode.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools.py" afterPath="$PROJECT_DIR$/tools.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,18 +48,18 @@
       <file leaf-file-name="datanode.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datanode.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-4874">
-              <caret line="344" column="0" lean-forward="false" selection-start-line="344" selection-start-column="0" selection-end-line="344" selection-end-column="0" />
+            <state relative-caret-position="593">
+              <caret line="368" column="0" lean-forward="false" selection-start-line="368" selection-start-column="0" selection-end-line="368" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="client.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/client.py">
+      <file leaf-file-name="namenode.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/namenode.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="816">
-              <caret line="49" column="23" lean-forward="false" selection-start-line="49" selection-start-column="23" selection-end-line="49" selection-end-column="23" />
+            <state relative-caret-position="217">
+              <caret line="473" column="0" lean-forward="false" selection-start-line="473" selection-start-column="0" selection-end-line="473" selection-end-column="0" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -37,34 +67,32 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="client.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/client.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="15" column="7" lean-forward="true" selection-start-line="15" selection-start-column="7" selection-end-line="15" selection-end-column="7" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tools.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tools.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="241">
+              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="12" column="1" lean-forward="true" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
+            <state relative-caret-position="209">
+              <caret line="11" column="29" lean-forward="false" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="decoder.py" pinned="false" current-in-tab="false">
-        <entry file="file:///usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/decoder.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="190">
-              <caret line="12" column="45" lean-forward="true" selection-start-line="12" selection-start-column="45" selection-end-line="12" selection-end-column="45" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="something.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test/something.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="104" column="4" lean-forward="false" selection-start-line="104" selection-start-column="4" selection-end-line="104" selection-end-column="4" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -80,8 +108,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>general_config</find>
-      <find>LOCAL</find>
       <find>ICPP</find>
       <find>task_queues</find>
       <find>shuffle_progress_lock</find>
@@ -110,6 +136,8 @@
       <find>shuf</find>
       <find>remove</find>
       <find>print</find>
+      <find>job_sta</find>
+      <find>TIME</find>
     </findStrings>
     <replaceStrings>
       <replace>job_fs_path</replace>
@@ -148,13 +176,13 @@
         <option value="$PROJECT_DIR$/app_route.py" />
         <option value="$PROJECT_DIR$/fs/output/datanode_1/partition_9" />
         <option value="$PROJECT_DIR$/algorithm.py" />
-        <option value="$PROJECT_DIR$/namenode.py" />
         <option value="$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_2/partition_4" />
         <option value="$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_4" />
         <option value="$PROJECT_DIR$/utilities.py" />
-        <option value="$PROJECT_DIR$/tools.py" />
         <option value="$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_12" />
         <option value="$PROJECT_DIR$/test/something.py" />
+        <option value="$PROJECT_DIR$/tools.py" />
+        <option value="$PROJECT_DIR$/namenode.py" />
         <option value="$PROJECT_DIR$/datanode.py" />
         <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/client.py" />
@@ -162,8 +190,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="12" />
-    <option name="y" value="50" />
+    <option name="y" value="24" />
     <option name="width" value="1680" />
     <option name="height" value="931" />
   </component>
@@ -185,6 +212,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -211,86 +239,9 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="output" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="output" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="datanode_1" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="output" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="datanode_0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
       <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -323,7 +274,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.datanode">
+  <component name="RunManager" selected="Python.client">
     <configuration default="false" name="socket_server" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -645,7 +596,14 @@
       <option name="project" value="LOCAL" />
       <updated>1493523331096</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Specify schedule plan as parameters when running client">
+      <created>1493524210054</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1493524210054</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TodoView">
@@ -658,10 +616,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="12" y="50" width="1680" height="931" extended-state="0" />
+    <frame x="0" y="24" width="1680" height="931" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18498169" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12148962" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32896304" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946634" sideWeight="0.50238097" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2920143" sideWeight="0.49761903" order="2" side_tool="false" content_ui="tabs" />
@@ -703,7 +661,8 @@
     <MESSAGE value="Add logic for revised schedule strategy&#10;Final reduce now runs in a separate thread; local reduce no longer overwrites original file; choose locally reduced file during final merging before final reduce." />
     <MESSAGE value="Pending file to fetch" />
     <MESSAGE value="Missing file request bug fixed.&#10;Bug: in thread_shuffle_task, not all partitions in the shuffle_task_list are requested. Reason: in python, params are passed by reference, remove final reduce thread will affect the list in the shuffle thread. Solution: copy list before passing; use counter in final reduce thread." />
-    <option name="LAST_COMMIT_MESSAGE" value="Missing file request bug fixed.&#10;Bug: in thread_shuffle_task, not all partitions in the shuffle_task_list are requested. Reason: in python, params are passed by reference, remove final reduce thread will affect the list in the shuffle thread. Solution: copy list before passing; use counter in final reduce thread." />
+    <MESSAGE value="Specify schedule plan as parameters when running client" />
+    <option name="LAST_COMMIT_MESSAGE" value="Specify schedule plan as parameters when running client" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -712,74 +671,94 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_3/partition_10">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_3/partition_5">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_1/partition_10">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-9083">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_1/partition_5">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_1/partition_3">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_0/partition_14">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_0/partition_3">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_0/partition_5">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="646">
-          <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#10#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_2/map_merged/datanode_0/partition_5" />
     <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_0/partition_14_lr" />
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_0">
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_0" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_1" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_4" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_1/partition_8" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_1/partition_4" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_1/partition_1" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_8" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_4" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_1" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_0" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_12">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="39" lean-forward="true" selection-start-line="0" selection-start-column="39" selection-end-line="0" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_11" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_7" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_2/partition_11" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_11" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_0/partition_7" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_0/partition_11" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_0/partition_12">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_1/partition_2" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_1/partition_6" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_1/partition_9">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_14" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_0" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_1" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_8" />
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_0/partition_13_lr" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_4" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_10" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_5" />
+    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_3" />
+    <entry file="file:///usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="10" column="32" lean-forward="false" selection-start-line="10" selection-start-column="32" selection-end-line="10" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utilities.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="179" column="4" lean-forward="false" selection-start-line="179" selection-start-column="4" selection-end-line="179" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/decoder.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="12" column="45" lean-forward="false" selection-start-line="12" selection-start-column="45" selection-end-line="12" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_3">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-4390">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_7">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-35748">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_8">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -787,74 +766,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_1">
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_2/partition_8">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_2/partition_4">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="617" lean-forward="false" selection-start-line="0" selection-start-column="617" selection-end-line="0" selection-end-column="617" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_1/partition_8">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_1/partition_4">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_1/partition_1">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_8">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_4">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_1">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_3/map_merged/datanode_0/partition_0">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
-          <caret line="0" column="1717" lean-forward="false" selection-start-line="0" selection-start-column="1717" selection-end-line="0" selection-end-column="1717" />
           <folding />
         </state>
       </provider>
@@ -867,31 +782,41 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_12">
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_2/partition_13">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="39" lean-forward="true" selection-start-line="0" selection-start-column="39" selection-end-line="0" selection-end-column="39" />
+        <state relative-caret-position="323">
+          <caret line="0" column="2285" lean-forward="false" selection-start-line="0" selection-start-column="2285" selection-end-line="0" selection-end-column="2285" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_11">
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_12">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="-7775">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_3/partition_7">
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_13">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
+        <state relative-caret-position="-4447">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_2/partition_11">
+    <entry file="file://$PROJECT_DIR$/test/something.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-238">
+          <caret line="70" column="9" lean-forward="false" selection-start-line="70" selection-start-column="9" selection-end-line="70" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_2/partition_3">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -907,209 +832,45 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_12">
+    <entry file="file://$PROJECT_DIR$/tools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="241">
+          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_11">
+    <entry file="file://$PROJECT_DIR$/namenode.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_1/partition_7">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_0/partition_7">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_0/partition_11">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_0/partition_12">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_1/partition_2">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_1/partition_6">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_1/partition_9">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_14">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_0">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_1">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_8">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/datanode/datanode_0/map_merged/datanode_0/partition_13_lr">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_3/partition_4">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_10">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_5">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fs/output/datanode_2/partition_3">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="10" column="32" lean-forward="false" selection-start-line="10" selection-start-column="32" selection-end-line="10" selection-end-column="32" />
+        <state relative-caret-position="217">
+          <caret line="473" column="0" lean-forward="false" selection-start-line="473" selection-start-column="0" selection-end-line="473" selection-end-column="0" />
           <folding>
-            <element signature="e#67#85#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utilities.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="179" column="4" lean-forward="false" selection-start-line="179" selection-start-column="4" selection-end-line="179" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/something.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="104" column="4" lean-forward="false" selection-start-line="104" selection-start-column="4" selection-end-line="104" selection-end-column="4" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#0#13#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/datanode.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4874">
-          <caret line="344" column="0" lean-forward="false" selection-start-line="344" selection-start-column="0" selection-end-line="344" selection-end-column="0" />
+        <state relative-caret-position="593">
+          <caret line="368" column="0" lean-forward="false" selection-start-line="368" selection-start-column="0" selection-end-line="368" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="12" column="1" lean-forward="true" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/json/decoder.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="12" column="45" lean-forward="true" selection-start-line="12" selection-start-column="45" selection-end-line="12" selection-end-column="45" />
+        <state relative-caret-position="209">
+          <caret line="11" column="29" lean-forward="false" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="816">
-          <caret line="49" column="23" lean-forward="false" selection-start-line="49" selection-start-column="23" selection-end-line="49" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="209">
+          <caret line="15" column="7" lean-forward="true" selection-start-line="15" selection-start-column="7" selection-end-line="15" selection-end-column="7" />
+          <folding />
         </state>
       </provider>
     </entry>

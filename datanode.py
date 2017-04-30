@@ -42,7 +42,7 @@ def datanode_start():
     :return: 
     
     """
-    log("START", "namenode started")
+    log("START", "datanode started")
     global datanode_id_self, datanodes_address, local_dir, reduce_output_datanode_dir, map_merged_dir, datanode_number
 
     # to simulate hdfs datanodes should have the same file system structure as the namenode
@@ -126,6 +126,9 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
     """
     global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir, reduce_output_datanode_dir, map_merged_final_dir, shuffle_out_queues, datanode_number, shuffle_in_progress_tracker
     global local_reduce_done_tracker, shuffle_out_list_tracker, shuffle_in_progress_tracker, final_reduce_list_tracker
+
+    job_start_time = time.time()
+
     # initialize shuffle queues for each job
     shuffle_out_queues = [queue.Queue(maxsize=0) for datanode_id in list(range(datanode_number))]
 
@@ -182,6 +185,8 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             send_json(rsock, map_datanode_done_info)
             break
 
+    job_map_done_time = time.time()
+
     merge_map_output(local_dir, map_merged_dir, map_merged_self_dir, partition_number)
     log("JOB", "finish merging map results")
 
@@ -199,6 +204,8 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
         shuffle_in_progress_tracker[partition_id] = 0
     shuffle_out_list_tracker = []
     final_reduce_list_tracker = []
+
+    job_received_plan_time = time.time()
 
     # receive shuffle and reduce task
     shuffle_and_reduce_task_info = get_json(rsock)
@@ -339,9 +346,26 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             log("JOB", "final reduce done")
             job_done_info = {'type': "FINAL_REDUCE_DONE", "job_name": job_name, "datanode_id": datanode_id_self}
             send_json(rsock, job_done_info)
+        job_done_time = time.time()
+
+        # total time used to finish map tasks
+        map_time = job_map_done_time - job_start_time
+
+        # total time used to receive schedule
+        make_schedule_time = job_received_plan_time - job_map_done_time
+
+        # total time used to carry the schedule plan and finish the job
+        exec_schedule_time = job_done_time - job_received_plan_time
+
+        # total time to finish the job
+        job_time = job_done_time - job_start_time
 
         # job done
         log("JOB", "job done")
+        log_time("map", map_time)
+        log_time("waiting for schedule", make_schedule_time)
+        log_time("executing schedule", exec_schedule_time)
+        log_time("job", job_time)
 
 
 def do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, schedule_plan):

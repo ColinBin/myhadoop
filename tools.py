@@ -28,6 +28,17 @@ def log(log_type, log_message):
     print("[" + log_type + "] " + log_message, flush=True)
 
 
+def log_time(activity, time):
+    """Print time elapsed
+    
+    :param activity: 
+    :param time: 
+    :return: 
+    """
+    time_formatted = int(time * 1000) / 1000
+    log("TIME", activity + " took " + str(time_formatted) + " seconds")
+
+
 def get_json(rsock):
     """Get json from sock
     

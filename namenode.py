@@ -6,7 +6,7 @@ import queue
 from utilities import *
 from robust_socket_io import *
 from algorithm import *
-import math
+import time
 
 datanode_number = general_config['datanode_number']
 
@@ -387,6 +387,8 @@ def thread_jobtracker():
     global job_queue_tracker, task_queues, datanodes_feedback_queue, partition_info_queue, datanode_number
 
     while True:
+        job_start_time = time.time()
+
         # get a new job
         job_info_json = job_queue_tracker.get()
 
@@ -466,6 +468,9 @@ def thread_jobtracker():
                     client_feedback_queue.put(job_done_client_info)
                     break
 
+        job_finish_time = time.time()
+        job_time = job_finish_time - job_start_time
+        log_time("job", job_time)
         log("JOB", "waiting for new job")
 
 
