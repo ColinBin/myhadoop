@@ -212,13 +212,13 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
         reduce_fun = app.reduce
 
         # send configuration information to final reduce thread
-        final_reduce_thread = threading.Thread(target=thread_final_reduce, args=(reduce_fun, map_merged_dir, map_merged_final_dir, reduce_output_datanode_dir, reduce_task_list, ))
+        final_reduce_thread = threading.Thread(target=thread_final_reduce, args=(reduce_fun, map_merged_dir, map_merged_final_dir, reduce_output_datanode_dir, reduce_task_list[:], ))
         final_reduce_thread.start()
 
         # apply different strategies based on schedule plan
         if job_schedule_plan == "HADOOP":
             # shuffle (file client) thread
-            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, job_schedule_plan)
+            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list[:], job_schedule_plan)
 
             # put into shuffle queues for file server
             for partition_id in shuffle_task_list:
@@ -263,7 +263,7 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
                 local_reduce_queue.put(local_reduce_info)
 
             # shuffle
-            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, job_schedule_plan)
+            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list[:], job_schedule_plan)
             awaiting_thread_list = awaiting_thread_list + shuffle_thread_list
             for awaiting_thread in awaiting_thread_list:
                 awaiting_thread.start()
@@ -319,9 +319,8 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             awaiting_thread_list.append(local_reduce_thread)
 
             # reverse the reduce task list
-            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, job_schedule_plan)
+            shuffle_thread_list = do_shuffle(datanodes_address, datanode_id_self, reduce_task_list[:], job_schedule_plan)
             awaiting_thread_list = awaiting_thread_list + shuffle_thread_list
-            print(str(reduce_task_list) + "+++++++++++")
 
             # overlapping thread logic
             for awaiting_thread in awaiting_thread_list:
@@ -398,20 +397,17 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     local_dir_datanode = os.path.join(map_merged_dir, make_datanode_dir_name(target_datanode_id))
     check_and_make_directory(local_dir_datanode)
 
-    print("Requesting file in " + str(shuffle_task_list) + " from datanode " + str(target_datanode_id))
     for target_partition_id in shuffle_task_list:
-        print("Requesting file " + str(target_partition_id) + " from datanode " + str(target_datanode_id))
+        # print("Requesting file " + str(target_partition_id) + " from datanode " + str(target_datanode_id))
 
         file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id, "datanode_id": datanode_id_self}
         send_json(file_client_rsock, file_request_info)
-        print(file_request_info)
         # get file size info
         file_size_info = get_json(file_client_rsock)
         if file_size_info['type'] == "FILE_SIZE":
             file_size = file_size_info['file_size']
             target_file_path = os.path.join(local_dir_datanode, make_partition_dir_name(target_partition_id))
             get_file(file_client_rsock, target_file_path, file_size)
-
             if schedule_plan == 'NEW':
                 # check whether partition ready for final reduce
                 shuffle_in_progress_lock.acquire()
@@ -428,9 +424,8 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
                     final_reduce_list_lock.acquire()
                     final_reduce_list_tracker.append(target_partition_id)
                     final_reduce_list_lock.release()
-
-            print("received partition " + str(target_partition_id) + " " )
-    print("File request over to datanode " + str(target_datanode_id))
+            # print("received partition " + str(target_partition_id) + " " )
+    # print("File request over to datanode " + str(target_datanode_id))
     file_request_over_info = {'type': "FILE_REQUEST_OVER", "datanode_id": datanode_id_self}
     send_json(file_client_rsock, file_request_over_info)
     file_client_sock.close()
@@ -452,7 +447,7 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
         local_reduce_info = local_reduce_queue.get()
         if local_reduce_info['type'] == "LOCAL_REDUCE_PARTITION":
             target_partition_id = local_reduce_info['partition_id']
-            print("local Reduce Start " + str(target_partition_id) + " ")
+            # print("local Reduce Start " + str(target_partition_id) + " ")
             # under NEW, check whether have been shuffled out or have been submitted to final reduce
             if schedule_plan == 'NEW':
 
@@ -477,7 +472,7 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
             # overwrite source file with reduced file
             reduce_file(source_file_path, source_file_path + "_lr", reduce_fun)
 
-            print("local Reduce Done " + str(target_partition_id) + " ")
+            # print("local Reduce Done " + str(target_partition_id) + " ")
 
             # update record
             local_reduce_done_lock.acquire()
@@ -519,7 +514,7 @@ def thread_serve_file(rsock):
         datanode_id = file_request_info['datanode_id']
         if request_type == "FILE_REQUEST":
             target_partition_id = file_request_info['partition_id']
-            print("To shuffle out " + str(target_partition_id) + " ")
+            # print("To shuffle out " + str(target_partition_id) + " ")
 
             # notify that the partition id is already shuffled out, no need for local reduce (under NEW)
             shuffle_out_list_lock.acquire()
@@ -605,13 +600,13 @@ def thread_final_reduce(reduce_fun, map_merged_dir, map_merged_final_dir, reduce
     :return: 
     """
     global final_reduce_queue, datanode_number
-    final_reduce_progress_tracker = reduce_task_list
+    final_reduce_progress_counter = len(reduce_task_list)
 
     while True:
         info = final_reduce_queue.get()
         if info['type'] == "FINAL_REDUCE_PARTITION":
             partition_id = info['partition_id']
-            print("Final reduce partition id " + str(partition_id)+ " ")
+            # print("Final reduce partition id " + str(partition_id)+ " ")
             # first do final merge
             merge_map_output_final_partition(map_merged_dir, map_merged_final_dir, partition_id, datanode_number)
 
@@ -619,9 +614,9 @@ def thread_final_reduce(reduce_fun, map_merged_dir, map_merged_final_dir, reduce
             final_reduce_partition(map_merged_final_dir, reduce_output_datanode_dir, reduce_fun, partition_id)
 
             # check if all done, if so, end thread
-            final_reduce_progress_tracker.remove(partition_id)
+            final_reduce_progress_counter -= 1
 
-            if not final_reduce_progress_tracker:
+            if final_reduce_progress_counter == 0:
                 break
 
 if __name__ == "__main__":

@@ -100,3 +100,6 @@ if td:
 
 print(time.time())
 
+l = [313,4324,534,525,562,626]
+for i in l:
+    print(l)
