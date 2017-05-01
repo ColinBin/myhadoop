@@ -1,15 +1,15 @@
 # general config
 general_config = {
     "mode": "local",
-    "datanode_number": 3,
+    "datanode_number": 4,
 }
 
 
 # net-related config
 net_config = {
-    "namenode_ip": "localhost",
-    "namenode_port_in": 1103,
-    "namenode_port_out": 1203,
+    "namenode_ip": "45.32.46.113",
+    "namenode_port_in": 6666,
+    "namenode_port_out": 8888,
 }
 
 # file system config
@@ -22,5 +22,5 @@ fs_config = {
 
 # task config
 task_config = {
-    "partition_number": 40,
+    "partition_number": 20,
 }
