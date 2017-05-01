@@ -29,6 +29,8 @@ shuffle_out_list_tracker = []                       # record partition ids that 
 final_reduce_list_tracker = []                      # record partition ids that already started final reduce
 final_reduce_list_lock = threading.Lock()
 
+local_reduce_done_to_shuffle_lock = threading.Lock()
+
 local_reduce_done_tracker = []
 local_reduce_done_lock = threading.Lock()
 
@@ -129,7 +131,7 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
     
     """
     global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir, reduce_output_datanode_dir, map_merged_final_dir, shuffle_out_queues, datanode_number, shuffle_in_progress_tracker
-    global local_reduce_done_tracker, shuffle_out_list_tracker, shuffle_in_progress_tracker, final_reduce_list_tracker
+    global local_reduce_done_tracker, shuffle_out_list_tracker, shuffle_in_progress_tracker, final_reduce_list_tracker, local_reduce_done_to_shuffle
 
     job_start_time = time.time()
 
@@ -264,6 +266,11 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
 
         elif job_schedule_plan == "ICPP":
 
+            # make shuffle queues ready, so that it does not matter whether some partition have been local reduced
+            for datanode_id in list(range(datanode_number)):
+                for partition_id in shuffle_task_list:
+                    shuffle_out_queues[datanode_id].put(partition_id)
+
             awaiting_thread_list = []
 
             # local reduce
@@ -311,11 +318,6 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             send_json(rsock, job_done_info)
 
         elif job_schedule_plan == "NEW":
-
-            # make shuffle queues ready, so that it does not matter whether some partition have been local reduced
-            # for datanode_id in list(range(datanode_number)):
-            #     for partition_id in shuffle_task_list:
-            #         shuffle_out_queues[datanode_id].put(partition_id)
 
             # assign local reduce tasks
             for partition_id in shuffle_task_list:
@@ -431,7 +433,7 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     for target_partition_id in shuffle_task_list:
         # print("Requesting file " + str(target_partition_id) + " from datanode " + str(target_datanode_id))
 
-        file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id, "datanode_id": datanode_id_self}
+        file_request_info = {'type': "FILE_REQUEST", 'partition_id': target_partition_id, "datanode_id": datanode_id_self, 'schedule_plan': schedule_plan}
         send_json(file_client_rsock, file_request_info)
         # get file size info
         file_size_info = get_json(file_client_rsock)
@@ -487,42 +489,20 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
                 if target_partition_id in final_reduce_started_partition_list:
                     continue
 
-            # print("local Reduce Start " + str(target_partition_id) + " ")
-            # under NEW, check whether have been shuffled out or have been submitted to final reduce
-            # if schedule_plan == 'NEW':
-            #
-            #     if local_reduce_info['to_shuffle'] is True:
-            #         # partition should be shuffled, check whether already shuffled
-            #         shuffle_out_list_lock.acquire()
-            #         shuffle_out_list = shuffle_out_list_tracker
-            #         shuffle_out_list_lock.release()
-            #         if target_partition_id in shuffle_out_list:
-            #             # if already shuffled out, get next partition for local reduce
-            #             continue
-
-                # else:
-                #     # partition should be final reduced, check whether already submitted to final reduce
-                #     final_reduce_list_lock.acquire()
-                #     final_reduce_list = final_reduce_list_tracker
-                #     final_reduce_list_lock.release()
-                #     if target_partition_id in final_reduce_list:
-                #         continue
-
             source_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
             # overwrite source file with reduced file
             reduce_file(source_file_path, source_file_path + "_lr", reduce_fun)
 
             # print("local Reduce Done " + str(target_partition_id) + " ")
 
-            # update record
-            local_reduce_done_lock.acquire()
-            local_reduce_done_tracker.append(target_partition_id)
-            local_reduce_done_lock.release()
-
-            if schedule_plan == 'ICPP' or schedule_plan == 'NEW':
+            if schedule_plan == "NEW":
                 # after local reduce, notify shuffle threads
                 for datanode_id in list(range(datanode_number)):
                     shuffle_out_queues[datanode_id].put(target_partition_id)
+            elif schedule_plan == "ICPP":
+                local_reduce_done_lock.acquire()
+                local_reduce_done_tracker.append(target_partition_id)
+                local_reduce_done_lock.release()
 
 
 def file_server(file_server_sock):
@@ -553,6 +533,7 @@ def thread_serve_file(rsock):
         request_type = file_request_info['type']
         datanode_id = file_request_info['datanode_id']
         if request_type == "FILE_REQUEST":
+            schedule_plan = file_request_info['schedule_plan']
             target_partition_id = file_request_info['partition_id']
             # print("To shuffle out " + str(target_partition_id) + " ")
 
@@ -562,19 +543,27 @@ def thread_serve_file(rsock):
             # shuffle_out_list_lock.release()
 
             # wait until the target partition is local reduced and ready for shuffling
-            while True:
-                if target_partition_id in local_reduce_ready_list:
-                    break
-                local_reduce_ready_partition = shuffle_out_queues[datanode_id].get()
-                local_reduce_ready_list.append(local_reduce_ready_partition)
+            if schedule_plan == 'NEW':
+                while True:
+                    if target_partition_id in local_reduce_ready_list:
+                        break
+                    local_reduce_ready_partition = shuffle_out_queues[datanode_id].get()
+                    local_reduce_ready_list.append(local_reduce_ready_partition)
+                target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+                target_partition_file_path = target_partition_file_path + '_lr'
 
-            target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+            elif schedule_plan == 'ICPP':
+                local_reduce_done_lock.acquire()
+                local_reduce_done_list = local_reduce_done_tracker
+                local_reduce_done_lock.release()
+                if target_partition_id not in local_reduce_done_list:
+                    target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+                else:
+                    target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+                    target_partition_file_path = target_partition_file_path + '_lr'
 
-            # if already local reduced, send reduced file
-            local_reduce_done_lock.acquire()
-            if target_partition_id in local_reduce_done_tracker:
-                target_partition_file_path = target_partition_file_path + "_lr"
-            local_reduce_done_lock.release()
+            else:
+                target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
 
             # send file size information
             file_size_info = {"type": "FILE_SIZE", "file_size": os.stat(target_partition_file_path).st_size}
