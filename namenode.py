@@ -393,10 +393,12 @@ def thread_jobtracker():
     global job_queue_tracker, task_queues, datanodes_feedback_queue, partition_info_queue, datanode_number
 
     while True:
-        job_start_time = time.time()
 
         # get a new job
         job_info_json = job_queue_tracker.get()
+
+        # record job start time
+        job_start_time = time.time()
 
         # notify scheduler
         job_queue_scheduler.put(job_info_json)

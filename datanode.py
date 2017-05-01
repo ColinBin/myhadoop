@@ -307,15 +307,11 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
         elif job_schedule_plan == "NEW":
 
             # make shuffle queues ready, so that it does not matter whether some partition have been local reduced
-            for datanode_id in list(range(datanode_number)):
-                for partition_id in shuffle_task_list:
-                    shuffle_out_queues[datanode_id].put(partition_id)
+            # for datanode_id in list(range(datanode_number)):
+            #     for partition_id in shuffle_task_list:
+            #         shuffle_out_queues[datanode_id].put(partition_id)
 
             # assign local reduce tasks
-            for partition_id in reduce_task_list:
-                local_reduce_info = {'type': "LOCAL_REDUCE_PARTITION", 'partition_id': partition_id,
-                                     "to_shuffle": False}
-                local_reduce_queue.put(local_reduce_info)
             for partition_id in shuffle_task_list:
                 local_reduce_info = {'type': "LOCAL_REDUCE_PARTITION", 'partition_id': partition_id,
                                      "to_shuffle": True}
@@ -340,6 +336,16 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             log("JOB", "shuffling done")
             shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
             send_json(rsock, shuffle_done_info)
+
+            for partition_id in reduce_task_list:
+                local_reduce_info = {'type': "LOCAL_REDUCE_PARTITION", 'partition_id': partition_id,
+                                     "to_shuffle": False}
+                local_reduce_queue.put(local_reduce_info)
+
+            local_reduce_thread = do_local_reduce(map_merged_self_dir, reduce_fun, job_schedule_plan)
+            local_reduce_thread.start()
+            local_reduce_thread.join()
+
 
             # start final reduce tasks
             for partition_id in reduce_task_list:
@@ -480,16 +486,16 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
             target_partition_id = local_reduce_info['partition_id']
             # print("local Reduce Start " + str(target_partition_id) + " ")
             # under NEW, check whether have been shuffled out or have been submitted to final reduce
-            if schedule_plan == 'NEW':
-
-                if local_reduce_info['to_shuffle'] is True:
-                    # partition should be shuffled, check whether already shuffled
-                    shuffle_out_list_lock.acquire()
-                    shuffle_out_list = shuffle_out_list_tracker
-                    shuffle_out_list_lock.release()
-                    if target_partition_id in shuffle_out_list:
-                        # if already shuffled out, get next partition for local reduce
-                        continue
+            # if schedule_plan == 'NEW':
+            #
+            #     if local_reduce_info['to_shuffle'] is True:
+            #         # partition should be shuffled, check whether already shuffled
+            #         shuffle_out_list_lock.acquire()
+            #         shuffle_out_list = shuffle_out_list_tracker
+            #         shuffle_out_list_lock.release()
+            #         if target_partition_id in shuffle_out_list:
+            #             # if already shuffled out, get next partition for local reduce
+            #             continue
 
                 # else:
                 #     # partition should be final reduced, check whether already submitted to final reduce
@@ -510,7 +516,7 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
             local_reduce_done_tracker.append(target_partition_id)
             local_reduce_done_lock.release()
 
-            if schedule_plan == 'ICPP':
+            if schedule_plan == 'ICPP' or schedule_plan == 'NEW':
                 # after local reduce, notify shuffle threads
                 for datanode_id in list(range(datanode_number)):
                     shuffle_out_queues[datanode_id].put(target_partition_id)
@@ -548,9 +554,9 @@ def thread_serve_file(rsock):
             # print("To shuffle out " + str(target_partition_id) + " ")
 
             # notify that the partition id is already shuffled out, no need for local reduce (under NEW)
-            shuffle_out_list_lock.acquire()
-            shuffle_out_list_tracker.append(target_partition_id)
-            shuffle_out_list_lock.release()
+            # shuffle_out_list_lock.acquire()
+            # shuffle_out_list_tracker.append(target_partition_id)
+            # shuffle_out_list_lock.release()
 
             # wait until the target partition is local reduced and ready for shuffling
             while True:
