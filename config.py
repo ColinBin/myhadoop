@@ -1,15 +1,15 @@
 # general config
 general_config = {
     "mode": "local",
-    "datanode_number": 3,
+    "datanode_number": 4,
 }
 
 
 # net-related config
 net_config = {
-    "namenode_ip": "localhost",
-    "namenode_port_in": 6666,
-    "namenode_port_out": 8888,
+    "namenode_ip": "45.32.46.113",
+    "namenode_port_in": 1100,
+    "namenode_port_out": 2200,
 }
 
 # file system config

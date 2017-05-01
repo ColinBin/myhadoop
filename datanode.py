@@ -312,14 +312,15 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
                     shuffle_out_queues[datanode_id].put(partition_id)
 
             # assign local reduce tasks
-            for partition_id in shuffle_task_list:
-                local_reduce_info = {'type': "LOCAL_REDUCE_PARTITION", 'partition_id': partition_id,
-                                     "to_shuffle": True}
-                local_reduce_queue.put(local_reduce_info)
             for partition_id in reduce_task_list:
                 local_reduce_info = {'type': "LOCAL_REDUCE_PARTITION", 'partition_id': partition_id,
                                      "to_shuffle": False}
                 local_reduce_queue.put(local_reduce_info)
+            for partition_id in shuffle_task_list:
+                local_reduce_info = {'type': "LOCAL_REDUCE_PARTITION", 'partition_id': partition_id,
+                                     "to_shuffle": True}
+                local_reduce_queue.put(local_reduce_info)
+
 
             awaiting_thread_list = []
             local_reduce_thread = do_local_reduce(map_merged_self_dir, reduce_fun, job_schedule_plan)
@@ -339,6 +340,11 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             log("JOB", "shuffling done")
             shuffle_done_info = {'type': 'SHUFFLE_DONE', "job_name": job_name, "datanode_id": datanode_id_self}
             send_json(rsock, shuffle_done_info)
+
+            # start final reduce tasks
+            for partition_id in reduce_task_list:
+                final_reduce_info = {'type': "FINAL_REDUCE_PARTITION", 'partition_id': partition_id}
+                final_reduce_queue.put(final_reduce_info)
 
             final_reduce_thread.join()
 
@@ -433,22 +439,22 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
             file_size = file_size_info['file_size']
             target_file_path = os.path.join(local_dir_datanode, make_partition_dir_name(target_partition_id))
             get_file(file_client_rsock, target_file_path, file_size)
-            if schedule_plan == 'NEW':
-                # check whether partition ready for final reduce
-                shuffle_in_progress_lock.acquire()
-                shuffle_in_progress_tracker[target_partition_id] += 1
-                current_shuffled_in_number = shuffle_in_progress_tracker[target_partition_id]
-                shuffle_in_progress_lock.release()
-                # data for this partition have been all received from other datanode
-                if current_shuffled_in_number == datanode_number - 1:
-
-                    final_reduce_info = {'type': "FINAL_REDUCE_PARTITION", 'partition_id': target_partition_id}
-                    final_reduce_queue.put(final_reduce_info)
-
-                    # add to final reduce list
-                    final_reduce_list_lock.acquire()
-                    final_reduce_list_tracker.append(target_partition_id)
-                    final_reduce_list_lock.release()
+            # if schedule_plan == 'NEW':
+            #     # check whether partition ready for final reduce
+            #     shuffle_in_progress_lock.acquire()
+            #     shuffle_in_progress_tracker[target_partition_id] += 1
+            #     current_shuffled_in_number = shuffle_in_progress_tracker[target_partition_id]
+            #     shuffle_in_progress_lock.release()
+            #     # data for this partition have been all received from other datanode
+            #     if current_shuffled_in_number == datanode_number - 1:
+            #
+            #         final_reduce_info = {'type': "FINAL_REDUCE_PARTITION", 'partition_id': target_partition_id}
+            #         final_reduce_queue.put(final_reduce_info)
+            #
+            #         # add to final reduce list
+            #         final_reduce_list_lock.acquire()
+            #         final_reduce_list_tracker.append(target_partition_id)
+            #         final_reduce_list_lock.release()
             # print("received partition " + str(target_partition_id) + " " )
     # print("File request over to datanode " + str(target_datanode_id))
     file_request_over_info = {'type': "FILE_REQUEST_OVER", "datanode_id": datanode_id_self}
@@ -485,13 +491,13 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
                         # if already shuffled out, get next partition for local reduce
                         continue
 
-                else:
-                    # partition should be final reduced, check whether already submitted to final reduce
-                    final_reduce_list_lock.acquire()
-                    final_reduce_list = final_reduce_list_tracker
-                    final_reduce_list_lock.release()
-                    if target_partition_id in final_reduce_list:
-                        continue
+                # else:
+                #     # partition should be final reduced, check whether already submitted to final reduce
+                #     final_reduce_list_lock.acquire()
+                #     final_reduce_list = final_reduce_list_tracker
+                #     final_reduce_list_lock.release()
+                #     if target_partition_id in final_reduce_list:
+                #         continue
 
             source_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
             # overwrite source file with reduced file
