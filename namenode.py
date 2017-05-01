@@ -224,6 +224,8 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
     for datanode_id in list(range(datanode_number)):
         datanode_load[datanode_id] = 0
 
+    # set threshold as 10% of average workload
+    threshold = average_workload * 0.2
     while True:
         # get partition with maximum combined locality and corresponding datanode
         current_partition_id = -1
@@ -233,9 +235,11 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
             for partition_id in list(range(partition_number)):
                 if partition_id not in reduce_decisions.keys():
                     if combined_locality[datanode_id][partition_id] > current_maximum_locality:
-                        current_maximum_locality = combined_locality[datanode_id][partition_id]
-                        current_partition_id = partition_id
-                        current_datanode_id = datanode_id
+                        expected_workload = datanode_load[datanode_id] + sum(partition_info_tracker[datanode_id][partition_id] for datanode_id in list(range(datanode_number)))
+                        if expected_workload <= average_workload + threshold:
+                            current_maximum_locality = combined_locality[datanode_id][partition_id]
+                            current_partition_id = partition_id
+                            current_datanode_id = datanode_id
 
         # all assigned
         if current_partition_id == -1:

@@ -8,8 +8,8 @@ general_config = {
 # net-related config
 net_config = {
     "namenode_ip": "45.32.46.113",
-    "namenode_port_in": 1100,
-    "namenode_port_out": 2200,
+    "namenode_port_in": 6666,
+    "namenode_port_out": 8888,
 }
 
 # file system config
@@ -22,5 +22,5 @@ fs_config = {
 
 # task config
 task_config = {
-    "partition_number": 15,
+    "partition_number": 40,
 }
