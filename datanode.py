@@ -346,6 +346,7 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
             log("JOB", "final reduce done")
             job_done_info = {'type': "FINAL_REDUCE_DONE", "job_name": job_name, "datanode_id": datanode_id_self}
             send_json(rsock, job_done_info)
+
         job_done_time = time.time()
 
         # total time used to finish map tasks
@@ -363,7 +364,7 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
         # job done
         log("JOB", "job done")
         log_time("map", map_time)
-        log_time("waiting for schedule", make_schedule_time)
+        log_time("merging and waiting", make_schedule_time)
         log_time("executing schedule", exec_schedule_time)
         log_time("job", job_time)
 

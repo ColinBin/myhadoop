@@ -119,6 +119,8 @@ def thread_scheduler():
         # print(partition_info_tracker)
         # schedule based on partition info
         reduce_task_lists, shuffle_task_lists = schedule(partition_info_tracker, schedule_plan)
+        print(reduce_task_lists)
+        print(shuffle_task_lists)
 
         # when local merge is done on every datanode, send shuffle and reduce instructions
         local_map_merge_info = partition_info_queue.get()
@@ -223,29 +225,26 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
         datanode_load[datanode_id] = 0
 
     while True:
-        # get datanode with minimum workload
-        current_datanode_id = 0
-        for datanode_id in list(range(datanode_number)):
-            if datanode_load[datanode_id] < datanode_load[current_datanode_id]:
-                current_datanode_id = datanode_id
-
-        # get maximum locality on current datanode
-        datanode_locality_info = combined_locality[current_datanode_id]
-        # find first partition not assigned
+        # get partition with maximum combined locality and corresponding datanode
         current_partition_id = -1
-        for partition_id in list(range(partition_number)):
-            if partition_id not in reduce_decisions.keys():
-                current_partition_id = partition_id
-        # all partition assigned
+        current_datanode_id = -1
+        current_maximum_locality = -1
+        for datanode_id in list(range(datanode_number)):
+            for partition_id in list(range(partition_number)):
+                if partition_id not in reduce_decisions.keys():
+                    if combined_locality[datanode_id][partition_id] > current_maximum_locality:
+                        current_maximum_locality = combined_locality[datanode_id][partition_id]
+                        current_partition_id = partition_id
+                        current_datanode_id = datanode_id
+
+        # all assigned
         if current_partition_id == -1:
             break
-        for partition_id in list(range(partition_number)):
-            if datanode_locality_info[partition_id] > datanode_locality_info[current_partition_id]:
-                if partition_id not in reduce_decisions.keys():
-                    current_partition_id = partition_id
+
         reduce_decisions[current_partition_id] = current_datanode_id
         datanode_load[current_datanode_id] = datanode_load[current_datanode_id] + sum(
-            partition_info_tracker[datanode_id][current_partition_id] for datanode_id in list(range(datanode_number)))
+            partition_info_tracker[datanode_id][current_partition_id] for datanode_id in
+            list(range(datanode_number)))
 
     # assign reduce and shuffle tasks
     for partition_id in list(range(partition_number)):
@@ -255,6 +254,7 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
                 reduce_task_lists[datanode_id].append(partition_id)
             else:
                 shuffle_task_lists[datanode_id].append(partition_id)
+    print(combined_locality)
 
     return reduce_task_lists, shuffle_task_lists
 
@@ -355,6 +355,8 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
                 reduce_task_lists[datanode_id].append(partition_id)
             else:
                 shuffle_task_lists[datanode_id].append(partition_id)
+
+    print(combined_locality)
     return reduce_task_lists, shuffle_task_lists
 
 
