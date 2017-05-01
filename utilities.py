@@ -7,16 +7,6 @@ from functools import reduce
 partition_number = task_config['partition_number']
 
 
-class LocalityHeap(object):
-    def __init__(self):
-        pass
-
-
-class NodeHeap(object):
-    def __init__(self):
-        pass
-
-
 def partition_sorted(partition_sorted_data, map_task_dir):
     """Make partitions based on sorted data
     Return length information for each partition

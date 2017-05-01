@@ -20,17 +20,6 @@ map_feedback_queue = queue.Queue(maxsize=0)         # feedback from map tasks
 
 shuffle_out_queues = None                           # shuffle queue for thread with each datanode
 
-shuffle_in_progress_lock = threading.Lock()
-shuffle_in_progress_tracker = dict()                # record partition ids and their received number from other datanode
-
-shuffle_out_list_lock = threading.Lock()
-shuffle_out_list_tracker = []                       # record partition ids that have been shuffled out
-
-final_reduce_list_tracker = []                      # record partition ids that already started final reduce
-final_reduce_list_lock = threading.Lock()
-
-local_reduce_done_to_shuffle_lock = threading.Lock()
-
 local_reduce_done_tracker = []
 local_reduce_done_lock = threading.Lock()
 
@@ -130,8 +119,8 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
     :return: 
     
     """
-    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir, reduce_output_datanode_dir, map_merged_final_dir, shuffle_out_queues, datanode_number, shuffle_in_progress_tracker
-    global local_reduce_done_tracker, shuffle_out_list_tracker, shuffle_in_progress_tracker, final_reduce_list_tracker, local_reduce_done_to_shuffle
+    global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir, reduce_output_datanode_dir, map_merged_final_dir, shuffle_out_queues, datanode_number
+    global local_reduce_done_tracker, local_reduce_done_to_shuffle
 
     job_start_time = time.time()
 
@@ -205,11 +194,6 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
 
     # TODO initialize the trackers
     local_reduce_done_tracker = []
-    # initialize shuffle progress tracker, marking how many shuffle tasks have been accomplished for each partition id
-    for partition_id in list(range(partition_number)):
-        shuffle_in_progress_tracker[partition_id] = 0
-    shuffle_out_list_tracker = []
-    final_reduce_list_tracker = []
 
     final_reduce_started_queue.put([])
 
@@ -358,23 +342,32 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
         job_done_time = time.time()
 
         # total time used to finish map tasks
-        map_time = job_map_done_time - job_start_time
+        map_time = get_time_in_ms(job_map_done_time - job_start_time)
 
         # total time used to receive schedule
-        make_schedule_time = job_received_plan_time - job_map_done_time
+        make_schedule_time = get_time_in_ms(job_received_plan_time - job_map_done_time)
 
         # total time used to carry the schedule plan and finish the job
-        exec_schedule_time = job_done_time - job_received_plan_time
+        exec_schedule_time = get_time_in_ms(job_done_time - job_received_plan_time)
 
         # total time to finish the job
-        job_time = job_done_time - job_start_time
+        job_time = get_time_in_ms(job_done_time - job_start_time)
 
         # job done
         log("JOB", "job done")
         log_time("map", map_time)
         log_time("merging and waiting", make_schedule_time)
         log_time("executing schedule", exec_schedule_time)
-        log_time("job", job_time)
+        log_time("datanode job", job_time)
+
+        # send time feedback
+        time_info = {"map": map_time, "merge_and_wait": make_schedule_time, "exec_schedule": exec_schedule_time, "datanode_job": job_time}
+        time_feedback_info = {'type': "TIME_FEEDBACK", "datanode_id": datanode_id_self, "time_info": time_info}
+        send_json(rsock, time_feedback_info)
+
+        # send time feedback done
+        time_feedback_info = {'type': "TIME_FEEDBACK_DONE", "datanode_id": datanode_id_self}
+        send_json(rsock, time_feedback_info)
 
 
 def do_shuffle(datanodes_address, datanode_id_self, reduce_task_list, schedule_plan):
@@ -420,7 +413,7 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
     :return: 
     
     """
-    global map_merged_dir, datanodes_address, datanode_id_self, datanode_number, final_reduce_queue, shuffle_in_progress_lock, shuffle_in_progress_tracker, final_reduce_list_lock, final_reduce_list_tracker
+    global map_merged_dir, datanodes_address, datanode_id_self, datanode_number, final_reduce_queue
 
     file_client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     file_client_sock.connect((target_datanode_ip, file_server_port))
@@ -443,24 +436,7 @@ def thread_shuffle_task(target_datanode_id, target_datanode_ip, file_server_port
             get_file(file_client_rsock, target_file_path, file_size)
             if schedule_plan == "NEW":
                 final_reduce_partition_queue.put_nowait(target_partition_id)
-            # if schedule_plan == 'NEW':
-            #     # check whether partition ready for final reduce
-            #     shuffle_in_progress_lock.acquire()
-            #     shuffle_in_progress_tracker[target_partition_id] += 1
-            #     current_shuffled_in_number = shuffle_in_progress_tracker[target_partition_id]
-            #     shuffle_in_progress_lock.release()
-            #     # data for this partition have been all received from other datanode
-            #     if current_shuffled_in_number == datanode_number - 1:
-            #
-            #         final_reduce_info = {'type': "FINAL_REDUCE_PARTITION", 'partition_id': target_partition_id}
-            #         final_reduce_queue.put(final_reduce_info)
-            #
-            #         # add to final reduce list
-            #         final_reduce_list_lock.acquire()
-            #         final_reduce_list_tracker.append(target_partition_id)
-            #         final_reduce_list_lock.release()
-            # print("received partition " + str(target_partition_id) + " " )
-    # print("File request over to datanode " + str(target_datanode_id))
+
     file_request_over_info = {'type': "FILE_REQUEST_OVER", "datanode_id": datanode_id_self}
     send_json(file_client_rsock, file_request_over_info)
     file_client_sock.close()
@@ -474,7 +450,7 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
     :param schedule_plan
     :return: 
     """
-    global datanode_number, shuffle_out_queues, local_reduce_queue, final_reduce_list_tracker, shuffle_out_list_tracker, final_reduce_started_queue
+    global datanode_number, shuffle_out_queues, local_reduce_queue, final_reduce_started_queue
 
     while True:
         if local_reduce_queue.empty():

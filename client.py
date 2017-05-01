@@ -4,7 +4,7 @@ from tools import *
 from robust_socket_io import *
 from sys import argv
 
-default_plan = "HADOOP"
+default_plan = "NEW"
 
 
 def client_start(schedule_plan):
@@ -36,6 +36,15 @@ def client_start(schedule_plan):
             log(job_feedback['status'], job_feedback['message'])
             if job_feedback['status'] == "JOB_DONE":
                 break
+
+    # receive time feedback
+    while True:
+        time_feedback = get_json(rsock)
+        if time_feedback['status'] == 'TIME_FEEDBACK_DONE':
+            break
+        elif time_feedback['status'] == 'TIME_FEEDBACK':
+            time_info = time_feedback['time_info']
+            print(time_info)
 
     # close socket
     rsock.close_sock()

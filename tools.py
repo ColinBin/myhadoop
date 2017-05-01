@@ -28,6 +28,10 @@ def log(log_type, log_message):
     print("[" + log_type + "] " + log_message, flush=True)
 
 
+def get_time_in_ms(time):
+    return int(time * 1000) / 1000
+
+
 def log_time(activity, time):
     """Print time elapsed
     
@@ -35,8 +39,7 @@ def log_time(activity, time):
     :param time: 
     :return: 
     """
-    time_formatted = int(time * 1000) / 1000
-    log("TIME", activity + " took " + str(time_formatted) + " seconds")
+    log("TIME", activity + " took " + str(time) + " seconds")
 
 
 def get_json(rsock):

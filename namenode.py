@@ -118,9 +118,14 @@ def thread_scheduler():
                 break
         # print(partition_info_tracker)
         # schedule based on partition info
+        schedule_start_time = time.time()
         reduce_task_lists, shuffle_task_lists = schedule(partition_info_tracker, schedule_plan)
-        print(reduce_task_lists)
-        print(shuffle_task_lists)
+        schedule_finish_time = time.time()
+        schedule_time = schedule_finish_time - schedule_start_time
+        # log_time("schedule", schedule_time)
+
+        # print(reduce_task_lists)
+        # print(shuffle_task_lists)
 
         # when local merge is done on every datanode, send shuffle and reduce instructions
         local_map_merge_info = partition_info_queue.get()
@@ -258,7 +263,7 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
                 reduce_task_lists[datanode_id].append(partition_id)
             else:
                 shuffle_task_lists[datanode_id].append(partition_id)
-    print(combined_locality)
+    # print(combined_locality)
 
     return reduce_task_lists, shuffle_task_lists
 
@@ -312,42 +317,8 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
         for partition_id in list(range(partition_number)):
             combined_locality[datanode_id][partition_id] = get_combined_locality(internal_locality[datanode_id][partition_id], node_locality[datanode_id][partition_id])
 
-    # previous solution
-    reduce_decisions = dict()  # partition_id : namenode_id
-    datanode_load = dict()  # datanode_id : workload
-
-    # initialize
-    for datanode_id in list(range(datanode_number)):
-        datanode_load[datanode_id] = 0
-
-    while True:
-        # get datanode with minimum workload
-        current_datanode_id = 0
-        for datanode_id in list(range(datanode_number)):
-            if datanode_load[datanode_id] < datanode_load[current_datanode_id]:
-                current_datanode_id = datanode_id
-
-        # get maximum locality on current datanode
-        datanode_locality_info = combined_locality[current_datanode_id]
-        # find first partition not assigned
-        current_partition_id = -1
-        for partition_id in list(range(partition_number)):
-            if partition_id not in reduce_decisions.keys():
-                current_partition_id = partition_id
-        # all partition assigned
-        if current_partition_id == -1:
-            break
-
-        for partition_id in list(range(partition_number)):
-            if datanode_locality_info[partition_id] > datanode_locality_info[current_partition_id]:
-                if partition_id not in reduce_decisions.keys():
-                    current_partition_id = partition_id
-        reduce_decisions[current_partition_id] = current_datanode_id
-        datanode_load[current_datanode_id] = datanode_load[current_datanode_id] + sum(
-            partition_info_tracker[datanode_id][current_partition_id] for datanode_id in list(range(datanode_number)))
-
-        # update partition locality
-        partition_locality.append((current_partition_id, datanode_locality_info[current_partition_id]))
+    # get schedule plan with heap managed function
+    reduce_decisions, partition_locality = heap_schedule(partition_info_tracker, combined_locality)
 
     partition_rank = [data[0] for data in sorted(partition_locality, key=lambda x: x[1], reverse=True)]
 
@@ -359,8 +330,8 @@ def schedule_new(partition_info_tracker,datanode_number, task_queues):
                 reduce_task_lists[datanode_id].append(partition_id)
             else:
                 shuffle_task_lists[datanode_id].append(partition_id)
+    # print(reduce_decisions)
 
-    print(combined_locality)
     return reduce_task_lists, shuffle_task_lists
 
 
@@ -412,7 +383,7 @@ def thread_jobtracker():
         log("JOBTRACKER", "new job started --> " + job_name)
 
         # keep track of datanode progress locally
-        datanode_progress_counter = {"START": 0, "MAP_ASSIGNMENT": 0, "MAP_DONE": 0, "LOCAL_MAP_MERGE_DONE": 0, "SHUFFLE_DONE": 0, "FINAL_REDUCE_DONE": 0}
+        datanode_progress_counter = {"START": 0, "MAP_ASSIGNMENT": 0, "MAP_DONE": 0, "LOCAL_MAP_MERGE_DONE": 0, "SHUFFLE_DONE": 0, "FINAL_REDUCE_DONE": 0, "TIME_FEEDBACK_DONE": 0}
 
         # notifying datanodes about new job
         for datanode_id in list(range(datanode_number)):
@@ -439,9 +410,9 @@ def thread_jobtracker():
             if map_feedback_info['type'] == 'MAP_TASK_DONE':
                 task_status = map_feedback_info['status']
                 map_task_id = map_feedback_info['map_task_id']
-                if task_status == "FINISH":
-                    task_done_client_info = {'type': "FEEDBACK", "status": "MAP_TASK_DONE", "message": "map task " + map_task_id + " done"}
-                    client_feedback_queue.put(task_done_client_info)
+                # if task_status == "FINISH":
+                #     task_done_client_info = {'type': "FEEDBACK", "status": "MAP_TASK_DONE", "message": "map task " + map_task_id + " done"}
+                #     client_feedback_queue.put(task_done_client_info)
             elif map_feedback_info['type'] == 'MAP_DATANODE_DONE':
                 datanode_id = map_feedback_info['datanode_id']
                 datanode_progress_counter['MAP_DONE'] += 1
@@ -463,6 +434,7 @@ def thread_jobtracker():
                     break
 
         # wait for shuffle and reduce feedback
+        time_info_temp_buffer = []
         while True:
             feedback_info = datanodes_feedback_queue.get()
             feedback_type = feedback_info['type']
@@ -475,10 +447,37 @@ def thread_jobtracker():
                     job_done_client_info = {'type': "FEEDBACK", "status": "JOB_DONE", "message": "job " + job_name + " all done"}
                     client_feedback_queue.put(job_done_client_info)
                     break
+            elif feedback_type in ['TIME_FEEDBACK', 'TIME_FEEDBACK_DONE']:
+                # for early received feedback, store in the buffer
+                time_info_temp_buffer.append(feedback_info)
+
+        # put time feedback of the buffer back into the feedback queue
+        for time_info_temp in time_info_temp_buffer:
+            datanodes_feedback_queue.put(time_info_temp)
 
         job_finish_time = time.time()
-        job_time = job_finish_time - job_start_time
-        log_time("job", job_time)
+        job_time = get_time_in_ms(job_finish_time - job_start_time)
+        log_time("namenode job", job_time)
+
+        # wait for time feedback
+        while True:
+            feedback_info = datanodes_feedback_queue.get()
+            feedback_type = feedback_info['type']
+            if feedback_type == 'TIME_FEEDBACK':
+
+                time_info = feedback_info['time_info']
+                time_info['namenode_job'] = job_time
+                datanode_id = feedback_info['datanode_id']
+
+                job_time_info = {'type': "FEEDBACK", "status": "TIME_FEEDBACK", "datanode_id": datanode_id, "time_info": time_info}
+                client_feedback_queue.put(job_time_info)
+
+            elif feedback_type == 'TIME_FEEDBACK_DONE':
+                datanode_progress_counter['TIME_FEEDBACK_DONE'] += 1
+                if datanode_progress_counter['TIME_FEEDBACK_DONE'] == datanode_number:
+                    job_time_info = {'type': "FEEDBACK", 'status': "TIME_FEEDBACK_DONE"}
+                    client_feedback_queue.put(job_time_info)
+                    break
         log("JOB", "waiting for new job")
 
 
@@ -555,6 +554,16 @@ def thread_datanode_tracker(rsock, addr, id):
                     datanodes_feedback_queue.put(feedback_info)
                     break
 
+            # waiting for time feedback
+            while True:
+                feedback_info = get_json(rsock)
+                feedback_type = feedback_info['type']
+                if feedback_type == "TIME_FEEDBACK":
+                    datanodes_feedback_queue.put(feedback_info)
+                elif feedback_type == 'TIME_FEEDBACK_DONE':
+                    datanodes_feedback_queue.put(feedback_info)
+                    break
+
 
 def thread_client(rsock, addr):
     """Obtain jobs to run
@@ -583,7 +592,7 @@ def thread_client(rsock, addr):
         while True:
             feedback_info = client_feedback_queue.get()
             send_json(rsock, feedback_info)
-            if feedback_info['status'] == "JOB_DONE":
+            if feedback_info['status'] == "TIME_FEEDBACK_DONE":
                 break
 
 if __name__ == "__main__":
