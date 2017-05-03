@@ -3,8 +3,11 @@ from config import *
 from tools import *
 from robust_socket_io import *
 from sys import argv
+import time
 
 default_plan = "NEW"
+
+record_dir_path = os.path.join(".", "job_record")
 
 
 def client_start(schedule_plan):
@@ -27,15 +30,27 @@ def client_start(schedule_plan):
 
     # receive job feedback
     # when receive status "JOB_DONE" or "ERROR", terminate
+    job_record_info = dict()
+    job_id = int(time.time())
+    job_record_info['schedule_plan'] = schedule_plan
+    job_record_info['map_time'] = []
+    job_record_info['exec_schedule_time'] = []
+    job_record_info['datanode_job_time'] = []
+    job_record_info['namenode_job_time'] = None
     while True:
         job_feedback = get_json(rsock)
         if job_feedback['status'] == "ERROR":
             err_log(job_feedback['status'], job_feedback['message'])
             break
         else:
-            log(job_feedback['status'], job_feedback['message'])
-            if job_feedback['status'] == "JOB_DONE":
+            if job_feedback['status'] == "schedule_feedback":
+                print(job_feedback)
+                job_record_info['partition_info'] = job_feedback['partition_info']
+                job_record_info['reduce_task_lists'] = job_feedback['reduce_task_lists']
+            elif job_feedback['status'] == "JOB_DONE":
                 break
+            else:
+                log(job_feedback['status'], job_feedback['message'])
 
     # receive time feedback
     while True:
@@ -44,11 +59,20 @@ def client_start(schedule_plan):
             break
         elif time_feedback['status'] == 'TIME_FEEDBACK':
             time_info = time_feedback['time_info']
+            job_record_info['map_time'].append(time_info['map'])
+            job_record_info['exec_schedule_time'].append(time_info['exec_schedule'])
+            job_record_info['datanode_job_time'].append(time_info['datanode_job'])
+            job_record_info['namenode_job_time'] = time_info['namenode_job']
             print(time_info)
-
     # close socket
     rsock.close_sock()
 
+    if not os.path.exists(record_dir_path):
+        err_log("FS", "job record dir not ready, record file not written")
+    else:
+        # write job record to local file
+        with open(os.path.join(record_dir_path, str(job_id)), 'w', encoding='utf-8') as f:
+            f.write(str(job_record_info))
 
 if __name__ == "__main__":
     if len(argv) == 2:

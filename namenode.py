@@ -124,6 +124,10 @@ def thread_scheduler():
         schedule_time = schedule_finish_time - schedule_start_time
         # log_time("schedule", schedule_time)
 
+        # send schedule information to client
+        schedule_feedback_info = {'type': "FEEDBACK", "status": "schedule_feedback", "partition_info": partition_info_tracker, "reduce_task_lists": reduce_task_lists, "shuffle_task_lists": shuffle_task_lists}
+        client_feedback_queue.put(schedule_feedback_info)
+
         # print(reduce_task_lists)
         # print(shuffle_task_lists)
 
