@@ -464,12 +464,14 @@ def thread_local_reduce(map_merged_self_dir, reduce_fun, schedule_plan):
             target_partition_id = local_reduce_info['partition_id']
             if schedule_plan == "NEW":
                 if local_reduce_info['to_shuffle']:
+                    pass
+                    # TODO improve overlapping
                     # partitions to be shuffled, check if already shuffled
-                    while not shuffle_out_lr_queue.empty():
-                        shuffled_out_partition_id = shuffle_out_lr_queue.get()
-                        shuffled_out_list.append(shuffled_out_partition_id)
-                    if target_partition_id in shuffled_out_list:
-                        continue
+                    # while not shuffle_out_lr_queue.empty():
+                    #     shuffled_out_partition_id = shuffle_out_lr_queue.get()
+                    #     shuffled_out_list.append(shuffled_out_partition_id)
+                    # if target_partition_id in shuffled_out_list:
+                    #     continue
                 else:
                     # partitions to be reduced, check if already final reduced
                     final_reduce_started_partition_list = final_reduce_started_queue.get()
@@ -531,19 +533,20 @@ def thread_serve_file(rsock):
 
             # check whether target partition has already been reduced, if so, send reduced file
             if schedule_plan == 'NEW':
-                target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
-                while not local_reduce_done_queues[datanode_id].empty():
-                    local_reduce_ready_partition = local_reduce_done_queues[datanode_id].get()
-                    local_reduce_ready_list.append(local_reduce_ready_partition)
-                if target_partition_id in local_reduce_ready_list:
-                    target_partition_file_path = target_partition_file_path + "_lr"
-                # while True:
-                #     if target_partition_id in local_reduce_ready_list:
-                #         break
+                # TODO improve overlapping
+                # target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+                # while not local_reduce_done_queues[datanode_id].empty():
                 #     local_reduce_ready_partition = local_reduce_done_queues[datanode_id].get()
                 #     local_reduce_ready_list.append(local_reduce_ready_partition)
-                # target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
-                # target_partition_file_path = target_partition_file_path + '_lr'
+                # if target_partition_id in local_reduce_ready_list:
+                #     target_partition_file_path = target_partition_file_path + "_lr"
+                while True:
+                    if target_partition_id in local_reduce_ready_list:
+                        break
+                    local_reduce_ready_partition = local_reduce_done_queues[datanode_id].get()
+                    local_reduce_ready_list.append(local_reduce_ready_partition)
+                target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
+                target_partition_file_path = target_partition_file_path + '_lr'
 
             elif schedule_plan == 'ICPP':
                 target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
