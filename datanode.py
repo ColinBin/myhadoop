@@ -26,6 +26,8 @@ local_reduce_done_lock = threading.Lock()
 local_reduce_queue = queue.Queue(maxsize=0)         # queue for local reduce thread
 final_reduce_queue = queue.Queue(maxsize=0)         # queue for final reduce reduce tasks
 
+shuffle_out_lr_queue = queue.Queue(maxsize=0)       # shuffle out queue for local reducer
+
 final_reduce_partition_queue = queue.Queue(maxsize=0)
 
 final_reduce_started_queue = queue.Queue(maxsize=0) # queue for local reduce to decide whether the reduce partition is to be local reduced
@@ -120,7 +122,7 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
     
     """
     global local_dir, datanode_id_self, datanodes_address, map_task_queue, map_feedback_queue, map_merged_dir, map_merged_self_dir, reduce_output_datanode_dir, map_merged_final_dir, shuffle_out_queues, datanode_number
-    global local_reduce_done_tracker, local_reduce_done_to_shuffle
+    global local_reduce_done_tracker, shuffle_out_lr_queue
 
     job_start_time = time.time()
 
@@ -194,6 +196,8 @@ def do_the_job(rsock, job_name, input_dir, output_dir, job_schedule_plan):
 
     # TODO initialize the trackers
     local_reduce_done_tracker = []
+
+    shuffle_out_lr_queue = queue.Queue(maxsize=0)
 
     final_reduce_started_queue.put([])
 
@@ -502,7 +506,7 @@ def thread_serve_file(rsock):
     :return: 
     
     """
-    global map_merged_dir
+    global map_merged_dir, shuffle_out_lr_queue
     local_reduce_ready_list = []
     while True:
         file_request_info = get_json(rsock)
@@ -512,6 +516,7 @@ def thread_serve_file(rsock):
             schedule_plan = file_request_info['schedule_plan']
             target_partition_id = file_request_info['partition_id']
             # print("To shuffle out " + str(target_partition_id) + " ")
+
 
             # notify that the partition id is already shuffled out, no need for local reduce (under NEW)
             # shuffle_out_list_lock.acquire()

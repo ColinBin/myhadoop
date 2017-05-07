@@ -9,6 +9,8 @@ default_plan = "NEW"
 
 record_dir_path = os.path.join(".", "job_record")
 
+partition_number = task_config['partition_number']
+
 
 def client_start(schedule_plan):
     """client for submitting jobs
@@ -37,6 +39,7 @@ def client_start(schedule_plan):
     job_record_info['exec_schedule_time'] = []
     job_record_info['datanode_job_time'] = []
     job_record_info['namenode_job_time'] = None
+    job_record_info['partition_number'] = partition_number
     while True:
         job_feedback = get_json(rsock)
         if job_feedback['status'] == "ERROR":
@@ -44,7 +47,7 @@ def client_start(schedule_plan):
             break
         else:
             if job_feedback['status'] == "schedule_feedback":
-                print(job_feedback)
+                # print(job_feedback)
                 job_record_info['partition_info'] = job_feedback['partition_info']
                 job_record_info['reduce_task_lists'] = job_feedback['reduce_task_lists']
             elif job_feedback['status'] == "JOB_DONE":
@@ -63,7 +66,7 @@ def client_start(schedule_plan):
             job_record_info['exec_schedule_time'].append(time_info['exec_schedule'])
             job_record_info['datanode_job_time'].append(time_info['datanode_job'])
             job_record_info['namenode_job_time'] = time_info['namenode_job']
-            print(time_info)
+            # print(time_info)
     # close socket
     rsock.close_sock()
 

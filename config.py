@@ -1,3 +1,5 @@
+import os
+
 # general config
 general_config = {
     "datanode_number": 4,
@@ -6,16 +8,16 @@ general_config = {
 
 # net-related config
 net_config = {
-    "namenode_ip": "45.32.46.113",
+    "namenode_ip": "localhost",
     "namenode_port_in": 6666,
     "namenode_port_out": 8888,
 }
 
 # file system config
 fs_config = {
-    "datanode_dir": "./fs/datanode",
-    "input_dir": "./fs/input",
-    "output_dir": "./fs/output",
+    "datanode_dir": os.path.join(".", 'fs', "datanode"),
+    "input_dir": os.path.join(".", "fs", "input"),
+    "output_dir": os.path.join(".", "fs", "output"),
     "output_overwrite": True,
 }
 
