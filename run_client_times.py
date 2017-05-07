@@ -2,7 +2,7 @@ from client import *
 
 times_each = 5
 
-schedule_plans = ['NEW', 'ICPP', 'HADOOP']
+schedule_plans = ['HADOOP', 'ICPP', "NEW"]
 
 
 def start():
