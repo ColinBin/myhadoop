@@ -234,7 +234,7 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
         datanode_load[datanode_id] = 0
 
     # set threshold as 10% of average workload
-    threshold = average_workload * 0.2
+    threshold = average_workload * 0.15
     while True:
         # get partition with maximum combined locality and corresponding datanode
         current_partition_id = -1

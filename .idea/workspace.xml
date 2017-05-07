@@ -1,30 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_20" afterPath="" />
+    <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="update input files">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/run_client_times.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client.py" afterPath="$PROJECT_DIR$/client.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config.py" afterPath="$PROJECT_DIR$/config.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_0" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_0" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_1" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_1" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_10" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_10" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_11" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_11" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_12" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_12" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_13" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_13" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_14" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_14" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_15" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_15" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_16" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_16" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_17" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_17" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_18" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_18" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_19" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_19" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_2" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_2" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_3" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_3" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_4" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_4" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_5" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_5" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_6" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_6" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_7" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_7" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_8" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_8" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fs/input/wordcount/combined_9" afterPath="$PROJECT_DIR$/fs/input/wordcount/combined_9" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/namenode.py" afterPath="$PROJECT_DIR$/namenode.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -73,28 +55,58 @@
       <file leaf-file-name="datanode.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datanode.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="247">
-              <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+            <state relative-caret-position="3426">
+              <caret line="434" column="28" lean-forward="true" selection-start-line="434" selection-start-column="28" selection-end-line="434" selection-end-column="28" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="config.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="namenode.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/namenode.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4199">
+              <caret line="229" column="52" lean-forward="true" selection-start-line="229" selection-start-column="52" selection-end-line="229" selection-end-column="52" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="algorithm.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/algorithm.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="171">
+              <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="190">
-              <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
+            <state relative-caret-position="266">
+              <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="client.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="client.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1128">
-              <caret line="7" column="22" lean-forward="false" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="22" />
+            <state relative-caret-position="1330">
+              <caret line="75" column="9" lean-forward="true" selection-start-line="75" selection-start-column="9" selection-end-line="75" selection-end-column="9" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="run_client_times.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/run_client_times.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="11" column="18" lean-forward="false" selection-start-line="11" selection-start-column="18" selection-end-line="11" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -111,8 +123,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>_lr</find>
-      <find>server_file</find>
       <find>8</find>
       <find>14</find>
       <find>Requesting file 13</find>
@@ -141,6 +151,8 @@
       <find>get_ket</find>
       <find>shuffle_out_queues</find>
       <find>print</find>
+      <find>threshold</find>
+      <find>thresold</find>
     </findStrings>
     <replaceStrings>
       <replace>job_fs_path</replace>
@@ -186,14 +198,15 @@
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/utilities.py" />
         <option value="$PROJECT_DIR$/algorithm.py" />
-        <option value="$PROJECT_DIR$/namenode.py" />
         <option value="$PROJECT_DIR$/job_record/1493800387" />
         <option value="$PROJECT_DIR$/export_record.py" />
         <option value="$PROJECT_DIR$/job_record/formatted_record/record" />
         <option value="$PROJECT_DIR$/app.py" />
         <option value="$PROJECT_DIR$/datanode.py" />
         <option value="$PROJECT_DIR$/client.py" />
+        <option value="$PROJECT_DIR$/namenode.py" />
         <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/run_client_times.py" />
       </list>
     </option>
   </component>
@@ -260,28 +273,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="myhadoop" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="fs" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="input" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wordcount" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
       <pane id="Scratches" />
@@ -318,7 +309,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.client">
+  <component name="RunManager" selected="Python.run_client_times">
     <configuration default="false" name="namenode" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -373,24 +364,6 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="myhadoop" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <method />
-    </configuration>
     <configuration default="false" name="export_record" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -404,6 +377,24 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="myhadoop" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/export_record.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="run_client_times" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="myhadoop" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run_client_times.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -497,16 +488,16 @@
       <item index="1" class="java.lang.String" itemvalue="Python.namenode" />
       <item index="2" class="java.lang.String" itemvalue="Python.datanode" />
       <item index="3" class="java.lang.String" itemvalue="Python.client" />
-      <item index="4" class="java.lang.String" itemvalue="Python.test" />
-      <item index="5" class="java.lang.String" itemvalue="Python.export_record" />
+      <item index="4" class="java.lang.String" itemvalue="Python.export_record" />
+      <item index="5" class="java.lang.String" itemvalue="Python.run_client_times" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.client" />
-        <item index="1" class="java.lang.String" itemvalue="Python.datanode" />
-        <item index="2" class="java.lang.String" itemvalue="Python.namenode" />
-        <item index="3" class="java.lang.String" itemvalue="Python.export_record" />
-        <item index="4" class="java.lang.String" itemvalue="Python.test" />
+        <item index="0" class="java.lang.String" itemvalue="Python.run_client_times" />
+        <item index="1" class="java.lang.String" itemvalue="Python.client" />
+        <item index="2" class="java.lang.String" itemvalue="Python.datanode" />
+        <item index="3" class="java.lang.String" itemvalue="Python.namenode" />
+        <item index="4" class="java.lang.String" itemvalue="Python.export_record" />
       </list>
     </recent_temporary>
   </component>
@@ -759,7 +750,14 @@
       <option name="project" value="LOCAL" />
       <updated>1494146289568</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="update input files">
+      <created>1494146502867</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1494146502867</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TodoView">
@@ -799,7 +797,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Directories checking" />
     <MESSAGE value="Json loads bug fixed" />
     <MESSAGE value="File server port queue" />
     <MESSAGE value="Improved socket interface" />
@@ -824,7 +821,8 @@
     <MESSAGE value="update new schedule" />
     <MESSAGE value="update config" />
     <MESSAGE value="reset new schedule" />
-    <option name="LAST_COMMIT_MESSAGE" value="reset new schedule" />
+    <MESSAGE value="update input files" />
+    <option name="LAST_COMMIT_MESSAGE" value="update input files" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -833,13 +831,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/job_record/1493800577">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/job_record/1493800628">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -909,13 +900,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/job_record/formatted_record/record">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -924,20 +908,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/robust_socket_io.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/namenode.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="576" column="13" lean-forward="true" selection-start-line="576" selection-start-column="13" selection-end-line="576" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/algorithm.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -1003,22 +973,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/datanode.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="247">
-          <caret line="19" column="0" lean-forward="false" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/client.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1128">
-          <caret line="7" column="22" lean-forward="false" selection-start-line="7" selection-start-column="16" selection-end-line="7" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/job_record/1494146198">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1035,10 +989,58 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/job_record/formatted_record/record">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="15" column="0" lean-forward="true" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/algorithm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="9" column="0" lean-forward="true" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/datanode.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3426">
+          <caret line="434" column="28" lean-forward="true" selection-start-line="434" selection-start-column="28" selection-end-line="434" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run_client_times.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="11" column="18" lean-forward="false" selection-start-line="11" selection-start-column="18" selection-end-line="11" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/namenode.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4199">
+          <caret line="229" column="52" lean-forward="true" selection-start-line="229" selection-start-column="52" selection-end-line="229" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
+        <state relative-caret-position="266">
+          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1330">
+          <caret line="75" column="9" lean-forward="true" selection-start-line="75" selection-start-column="9" selection-end-line="75" selection-end-column="9" />
           <folding />
         </state>
       </provider>

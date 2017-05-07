@@ -51,6 +51,7 @@ def client_start(schedule_plan):
                 job_record_info['partition_info'] = job_feedback['partition_info']
                 job_record_info['reduce_task_lists'] = job_feedback['reduce_task_lists']
             elif job_feedback['status'] == "JOB_DONE":
+                log(job_feedback['status'], job_feedback['message'])
                 break
             else:
                 log(job_feedback['status'], job_feedback['message'])

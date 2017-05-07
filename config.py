@@ -23,5 +23,5 @@ fs_config = {
 
 # task config
 task_config = {
-    "partition_number": 40,
+    "partition_number": 20,
 }
