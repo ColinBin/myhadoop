@@ -550,9 +550,9 @@ def thread_serve_file(rsock):
 
             elif schedule_plan == 'ICPP':
                 target_partition_file_path = os.path.join(map_merged_self_dir, make_partition_dir_name(target_partition_id))
-                local_reduce_done_lock.acquire()
+                # local_reduce_done_lock.acquire()
                 local_reduce_done_list = local_reduce_done_tracker
-                local_reduce_done_lock.release()
+                # local_reduce_done_lock.release()
                 if target_partition_id in local_reduce_done_list:
                     target_partition_file_path = target_partition_file_path + '_lr'
 

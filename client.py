@@ -11,11 +11,14 @@ record_dir_path = os.path.join(".", "job_record")
 
 partition_number = task_config['partition_number']
 
+datanode_number = general_config['datanode_number']
 
-def client_start(schedule_plan):
+
+def client_start(schedule_plan, input_volume=768):
     """client for submitting jobs
     
     :param schedule_plan
+    :param input_volume
     :return: 
     
     """
@@ -26,8 +29,10 @@ def client_start(schedule_plan):
     sock.connect((namenode_ip, namenode_port_out))
     rsock = RSockIO(sock)
 
+    job_fs_path = os.path.join("wordcount", str(input_volume))
+
     # send job information
-    job_information = {"type": "NEW_JOB", "job_name": "WordCount", "job_fs_path": "wordcount", "schedule_plan": schedule_plan}
+    job_information = {"type": "NEW_JOB", "job_name": "WordCount", "job_fs_path": job_fs_path, "schedule_plan": schedule_plan}
     send_json(rsock, job_information)
 
     # receive job feedback
@@ -40,6 +45,8 @@ def client_start(schedule_plan):
     job_record_info['datanode_job_time'] = []
     job_record_info['namenode_job_time'] = None
     job_record_info['partition_number'] = partition_number
+    job_record_info['datanode_number'] = datanode_number
+    job_record_info['input_volume'] = input_volume
     while True:
         job_feedback = get_json(rsock)
         if job_feedback['status'] == "ERROR":

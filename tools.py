@@ -108,6 +108,17 @@ def check_and_make_directory(dir_path):
     os.mkdir(dir_path, 0o755)
 
 
+def get_sequence_suffix(number):
+    if int(number) == 1:
+        return "1st"
+    elif int(number) == 2:
+        return "2nd"
+    elif int(number) == 3:
+        return "3rd"
+    else:
+        return str(number) + "th"
+
+
 def make_datanode_dir_name(datanode_id):
     return "datanode_" + str(datanode_id)
 

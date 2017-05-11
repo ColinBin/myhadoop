@@ -17,6 +17,18 @@ def start():
         schedule_plan = data_dict['schedule_plan']
         record_line = add_item(record_line, schedule_plan)
 
+        # datanode number
+        datanode_number = data_dict['datanode_number']
+        record_line = add_item(record_line, datanode_number)
+
+        # partition_number
+        partition_number = data_dict['partition_number']
+        record_line = add_item(record_line, partition_number)
+
+        # input volume
+        input_volume = data_dict['input_volume']
+        record_line = add_item(record_line, input_volume)
+
         # map task time
         map_time_list = data_dict['map_time']
         for map_time in map_time_list:
