@@ -261,6 +261,8 @@ def schedule_icpp(partition_info_tracker, datanode_number, task_queues):
 
     # assign reduce and shuffle tasks
     for partition_id in list(range(partition_number)):
+        if partition_id not in reduce_decisions.keys():
+            continue
         target_datanode_id = reduce_decisions[partition_id]
         for datanode_id in list(range(datanode_number)):
             if datanode_id == target_datanode_id:

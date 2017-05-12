@@ -5,7 +5,7 @@ from robust_socket_io import *
 from sys import argv
 import time
 
-default_plan = "HADOOP"
+default_plan = "ICPP"
 
 record_dir_path = os.path.join(".", "job_record")
 
