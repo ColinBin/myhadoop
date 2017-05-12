@@ -1,7 +1,7 @@
 from client import *
 from tools import get_sequence_suffix
 
-times_each = 3
+times_each = 2
 
 schedule_plans = ['HADOOP', 'ICPP', "NEW"]
 

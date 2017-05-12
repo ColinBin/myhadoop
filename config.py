@@ -2,15 +2,15 @@ import os
 
 # general config
 general_config = {
-    "datanode_number": 4,
+    "datanode_number": 2,
 }
 
 
 # net-related config
 net_config = {
     "namenode_ip": "45.32.46.113",
-    "namenode_port_in": 6666,
-    "namenode_port_out": 8888,
+    "namenode_port_in": 1111,
+    "namenode_port_out": 2211,
 }
 
 # file system config
