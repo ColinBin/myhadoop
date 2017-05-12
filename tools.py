@@ -50,7 +50,7 @@ def get_json(rsock):
      
     """
     received_length, data_str = rsock.readlineb()
-    print("get: " + data_str)
+    # print("get: " + data_str)
     data_json = json.loads(data_str)
     return data_json
 
@@ -63,7 +63,7 @@ def send_json(rsock, data_json):
     :return: 
     
     """
-    print("send: " + str(data_json))
+    # print("send: " + str(data_json))
     data_bytes = json.dumps(data_json).encode()
     rsock.sendline(data_bytes)
 
