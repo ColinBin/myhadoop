@@ -2,14 +2,14 @@ import os
 
 # general config
 general_config = {
-    "datanode_number": 8,
+    "datanode_number": 16,
 }
 
 
 # net-related config
 net_config = {
     "namenode_ip": "45.32.46.113",
-    "namenode_port_in": 1112,
+    "namenode_port_in": 1113,
     "namenode_port_out": 2212,
 }
 
@@ -23,5 +23,5 @@ fs_config = {
 
 # task config
 task_config = {
-    "partition_number": 60,
+    "partition_number": 100,
 }
