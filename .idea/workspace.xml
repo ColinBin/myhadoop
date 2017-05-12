@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="">
+    <list default="true" id="6817d08e-7d80-44d3-be6c-eebfedec9321" name="Default" comment="debug on">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools.py" afterPath="$PROJECT_DIR$/tools.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/client.py" afterPath="$PROJECT_DIR$/client.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/namenode.py" afterPath="$PROJECT_DIR$/namenode.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -28,8 +29,8 @@
       <file leaf-file-name="client.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="383">
-              <caret line="66" column="15" lean-forward="true" selection-start-line="66" selection-start-column="15" selection-end-line="66" selection-end-column="15" />
+            <state relative-caret-position="180">
+              <caret line="56" column="20" lean-forward="false" selection-start-line="56" selection-start-column="20" selection-end-line="56" selection-end-column="20" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
               </folding>
@@ -37,11 +38,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="namenode.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="export_record.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/export_record.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-406">
+              <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="namenode.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/namenode.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="426" column="0" lean-forward="true" selection-start-line="426" selection-start-column="0" selection-end-line="426" selection-end-column="0" />
+            <state relative-caret-position="286">
+              <caret line="129" column="0" lean-forward="true" selection-start-line="129" selection-start-column="0" selection-end-line="129" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -57,11 +68,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tools.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tools.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="284">
-              <caret line="65" column="34" lean-forward="false" selection-start-line="65" selection-start-column="34" selection-end-line="65" selection-end-column="34" />
+            <state relative-caret-position="181">
+              <caret line="53" column="0" lean-forward="false" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -80,7 +91,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>Requesting file 13</find>
       <find>----</find>
       <find>To shuffle out 14</find>
       <find>Requesting file 14</find>
@@ -110,6 +120,7 @@
       <find>thresold</find>
       <find>thres</find>
       <find>merge_partition_info</find>
+      <find>reduce_task_lists</find>
     </findStrings>
     <replaceStrings>
       <replace>job_fs_path</replace>
@@ -157,13 +168,13 @@
         <option value="$PROJECT_DIR$/job_record/1493800387" />
         <option value="$PROJECT_DIR$/job_record/formatted_record/record" />
         <option value="$PROJECT_DIR$/app.py" />
-        <option value="$PROJECT_DIR$/namenode.py" />
         <option value="$PROJECT_DIR$/datanode.py" />
         <option value="$PROJECT_DIR$/export_record.py" />
         <option value="$PROJECT_DIR$/run_client_times.py" />
-        <option value="$PROJECT_DIR$/client.py" />
         <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/tools.py" />
+        <option value="$PROJECT_DIR$/client.py" />
+        <option value="$PROJECT_DIR$/namenode.py" />
       </list>
     </option>
   </component>
@@ -284,7 +295,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.run_client_times">
+  <component name="RunManager" selected="Python.client">
     <configuration default="false" name="namenode" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -468,8 +479,8 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.run_client_times" />
-        <item index="1" class="java.lang.String" itemvalue="Python.client" />
+        <item index="0" class="java.lang.String" itemvalue="Python.client" />
+        <item index="1" class="java.lang.String" itemvalue="Python.run_client_times" />
         <item index="2" class="java.lang.String" itemvalue="Python.datanode" />
         <item index="3" class="java.lang.String" itemvalue="Python.namenode" />
         <item index="4" class="java.lang.String" itemvalue="Python.export_record" />
@@ -805,7 +816,14 @@
       <option name="project" value="LOCAL" />
       <updated>1494584218361</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="debug on">
+      <created>1494596257075</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1494596257075</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TodoView">
@@ -845,7 +863,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add logic for revised schedule strategy&#10;Final reduce now runs in a separate thread; local reduce no longer overwrites original file; choose locally reduced file during final merging before final reduce." />
     <MESSAGE value="Pending file to fetch" />
     <MESSAGE value="Missing file request bug fixed.&#10;Bug: in thread_shuffle_task, not all partitions in the shuffle_task_list are requested. Reason: in python, params are passed by reference, remove final reduce thread will affect the list in the shuffle thread. Solution: copy list before passing; use counter in final reduce thread." />
     <MESSAGE value="Specify schedule plan as parameters when running client" />
@@ -870,7 +887,8 @@
     <MESSAGE value="2 datanodes" />
     <MESSAGE value="8 datanodes" />
     <MESSAGE value="16 datanodes" />
-    <option name="LAST_COMMIT_MESSAGE" value="16 datanodes" />
+    <MESSAGE value="debug on" />
+    <option name="LAST_COMMIT_MESSAGE" value="debug on" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -897,13 +915,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/export_record.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="19">
-          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -1214,10 +1225,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/tools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="181">
+          <caret line="53" column="0" lean-forward="false" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/export_record.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-406">
+          <caret line="18" column="0" lean-forward="false" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="383">
-          <caret line="66" column="15" lean-forward="true" selection-start-line="66" selection-start-column="15" selection-end-line="66" selection-end-column="15" />
+        <state relative-caret-position="180">
+          <caret line="56" column="20" lean-forward="false" selection-start-line="56" selection-start-column="20" selection-end-line="56" selection-end-column="20" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>
@@ -1226,19 +1255,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/namenode.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="426" column="0" lean-forward="true" selection-start-line="426" selection-start-column="0" selection-end-line="426" selection-end-column="0" />
+        <state relative-caret-position="286">
+          <caret line="129" column="0" lean-forward="true" selection-start-line="129" selection-start-column="0" selection-end-line="129" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="65" column="34" lean-forward="false" selection-start-line="65" selection-start-column="34" selection-end-line="65" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
